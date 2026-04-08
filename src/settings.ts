@@ -1,19 +1,35 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import { createTranslator, type PluginLanguage } from "./i18n";
 import type ODecimalPlugin from "./main";
-
-export type TreeItemTypePriority = "mixed" | "folders-first" | "files-first";
+import {
+	DEFAULT_PREFIX_STYLE_SETTINGS,
+	PREFIX_STYLE_SLOT_DEFINITIONS,
+	type PrefixDisplayMode,
+	type PrefixStyleSettings,
+	type PrefixStyleSlotId,
+	type TreeItemTypePriority,
+} from "./prefixStyle";
+export type {
+	PrefixDisplayMode,
+	PrefixStyleSettings,
+	PrefixStyleSlotId,
+	TreeItemTypePriority,
+} from "./prefixStyle";
 
 export interface ODecimalSettings {
 	language: PluginLanguage;
 	enableNumericMixedSorting: boolean;
 	treeItemTypePriority: TreeItemTypePriority;
+	prefixDisplayMode: PrefixDisplayMode;
+	prefixStyles: PrefixStyleSettings;
 }
 
 export const DEFAULT_SETTINGS: ODecimalSettings = {
 	language: "auto",
 	enableNumericMixedSorting: true,
 	treeItemTypePriority: "mixed",
+	prefixDisplayMode: "hidden",
+	prefixStyles: DEFAULT_PREFIX_STYLE_SETTINGS,
 };
 
 export class ODecimalSettingTab extends PluginSettingTab {
@@ -29,13 +45,19 @@ export class ODecimalSettingTab extends PluginSettingTab {
 		containerEl.empty();
 		const t = createTranslator(this.plugin.settings.language);
 
-		new Setting(containerEl).setName(t("settingsSectionHeading")).setHeading();
+		new Setting(containerEl)
+			.setName(t("settingsSectionHeading"))
+			.setHeading();
 
 		let typePrioritySetting: Setting | null = null;
 
 		const updateTypePriorityState = (enabled: boolean): void => {
-			typePrioritySetting?.settingEl.toggleClass("o-decimal-setting-disabled", !enabled);
-			const dropdown = typePrioritySetting?.controlEl.querySelector("select");
+			typePrioritySetting?.settingEl.toggleClass(
+				"o-decimal-setting-disabled",
+				!enabled,
+			);
+			const dropdown =
+				typePrioritySetting?.controlEl.querySelector("select");
 			if (dropdown instanceof HTMLSelectElement) {
 				dropdown.disabled = !enabled;
 			}
@@ -55,6 +77,22 @@ export class ODecimalSettingTab extends PluginSettingTab {
 							language: value as PluginLanguage,
 						});
 						this.display();
+					}),
+			);
+
+		new Setting(containerEl)
+			.setName(t("prefixDisplayModeName"))
+			.setDesc(t("prefixDisplayModeDesc"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption("original", t("prefixDisplayModeOriginal"))
+					.addOption("badge", t("prefixDisplayModeBadge"))
+					.addOption("hidden", t("prefixDisplayModeHidden"))
+					.setValue(this.plugin.settings.prefixDisplayMode)
+					.onChange(async (value) => {
+						await this.plugin.applySettings({
+							prefixDisplayMode: value as PrefixDisplayMode,
+						});
 					}),
 			);
 
@@ -89,5 +127,195 @@ export class ODecimalSettingTab extends PluginSettingTab {
 			);
 
 		updateTypePriorityState(this.plugin.settings.enableNumericMixedSorting);
+
+		new Setting(containerEl).setName(t("badgeStylesHeading")).setHeading();
+
+		new Setting(containerEl)
+			.setName(t("badgeRadiusName"))
+			.setDesc(t("badgeRadiusDesc"))
+			.addSlider((slider) =>
+				slider
+					.setLimits(0, 99, 1)
+					.setDynamicTooltip()
+					.setValue(this.plugin.settings.prefixStyles.badgeRadius)
+					.onChange(async (value) => {
+						await this.plugin.applySettings({
+							prefixStyles: {
+								...this.plugin.settings.prefixStyles,
+								badgeRadius: value,
+							},
+						});
+					}),
+			);
+
+		for (const slot of PREFIX_STYLE_SLOT_DEFINITIONS) {
+			new Setting(containerEl)
+				.setName(t(`${slot.id}Heading`))
+				.setHeading();
+
+			new Setting(containerEl)
+				.setName(t("badgeBackgroundColorName"))
+				.setDesc(t("badgeBackgroundColorDesc"))
+				.addColorPicker((picker) =>
+					picker
+						.setValue(
+							this.plugin.settings.prefixStyles.slots[slot.id]
+								.backgroundColor || slot.colorPickerFallback,
+						)
+						.onChange(async (value) => {
+							await this.plugin.applySettings({
+								prefixStyles: updatePrefixStyleSlot(
+									this.plugin.settings.prefixStyles,
+									slot.id,
+									{
+										backgroundColor: value,
+									},
+								),
+							});
+						}),
+				)
+				.addExtraButton((button) =>
+					button
+						.setIcon("reset")
+						.setTooltip(t("resetThemeDefault"))
+						.onClick(async () => {
+							await this.plugin.applySettings({
+								prefixStyles: updatePrefixStyleSlot(
+									this.plugin.settings.prefixStyles,
+									slot.id,
+									{
+										backgroundColor: "",
+									},
+								),
+							});
+							this.display();
+						}),
+				);
+
+			new Setting(containerEl)
+				.setName(t("badgeTextColorName"))
+				.setDesc(t("badgeTextColorDesc"))
+				.addColorPicker((picker) =>
+					picker
+						.setValue(
+							this.plugin.settings.prefixStyles.slots[slot.id]
+								.textColor || slot.textColorPickerFallback,
+						)
+						.onChange(async (value) => {
+							await this.plugin.applySettings({
+								prefixStyles: updatePrefixStyleSlot(
+									this.plugin.settings.prefixStyles,
+									slot.id,
+									{
+										textColor: value,
+									},
+								),
+							});
+						}),
+				)
+				.addExtraButton((button) =>
+					button
+						.setIcon("reset")
+						.setTooltip(t("resetThemeDefault"))
+						.onClick(async () => {
+							await this.plugin.applySettings({
+								prefixStyles: updatePrefixStyleSlot(
+									this.plugin.settings.prefixStyles,
+									slot.id,
+									{
+										textColor: "",
+									},
+								),
+							});
+							this.display();
+						}),
+				);
+
+			new Setting(containerEl)
+				.setName(t("badgeBackgroundOpacityName"))
+				.setDesc(t("badgeBackgroundOpacityDesc"))
+				.addSlider((slider) =>
+					slider
+						.setLimits(0, 100, 1)
+						.setDynamicTooltip()
+						.setValue(
+							this.plugin.settings.prefixStyles.slots[slot.id]
+								.backgroundOpacity,
+						)
+						.onChange(async (value) => {
+							await this.plugin.applySettings({
+								prefixStyles: updatePrefixStyleSlot(
+									this.plugin.settings.prefixStyles,
+									slot.id,
+									{
+										backgroundOpacity: value,
+									},
+								),
+							});
+						}),
+				);
+		}
+
+		const advancedDetailsEl = containerEl.createEl("details", {
+			cls: "o-decimal-advanced-settings",
+		});
+		advancedDetailsEl.createEl("summary", {
+			text: t("advancedStylesSummary"),
+		});
+		const advancedContainerEl = advancedDetailsEl.createDiv(
+			"o-decimal-advanced-settings-body",
+		);
+		new Setting(advancedContainerEl)
+			.setName(t("advancedCustomCssName"))
+			.setDesc(t("advancedCustomCssDesc"));
+		const advancedCssEditorEl = advancedContainerEl.createDiv("o-decimal-advanced-css-editor");
+		const advancedCssInputEl = advancedCssEditorEl.createEl("textarea", {
+			cls: "o-decimal-advanced-css-input",
+			attr: {
+				rows: 10,
+				spellcheck: "false",
+			},
+		});
+		advancedCssInputEl.placeholder = t("advancedCustomCssPlaceholder");
+		advancedCssInputEl.value = this.plugin.settings.prefixStyles.advancedCss;
+		advancedCssInputEl.addEventListener("change", async () => {
+			await this.plugin.applySettings({
+				prefixStyles: {
+					...this.plugin.settings.prefixStyles,
+					advancedCss: advancedCssInputEl.value,
+				},
+			});
+		});
+		const advancedHelpEl = advancedContainerEl.createDiv("o-decimal-advanced-css-help");
+		advancedHelpEl.createDiv({
+			cls: "o-decimal-advanced-css-help-title",
+			text: t("advancedCustomCssHelpTitle"),
+		});
+		const advancedHelpListEl = advancedHelpEl.createEl("ul", {
+			cls: "o-decimal-advanced-css-help-list",
+		});
+		advancedHelpListEl.createEl("li", {
+			text: t("advancedCustomCssHelp1"),
+		});
+		advancedHelpListEl.createEl("li", {
+			text: t("advancedCustomCssHelp2"),
+		});
 	}
+}
+
+function updatePrefixStyleSlot(
+	settings: PrefixStyleSettings,
+	slotId: PrefixStyleSlotId,
+	update: Partial<PrefixStyleSettings["slots"][PrefixStyleSlotId]>,
+): PrefixStyleSettings {
+	return {
+		...settings,
+		slots: {
+			...settings.slots,
+			[slotId]: {
+				...settings.slots[slotId],
+				...update,
+			},
+		},
+	};
 }

@@ -16,3 +16,102 @@
 .o-decimal-setting-disabled .setting-item-control {
 	pointer-events: none;
 }
+
+.o-decimal-prefix-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45em;
+	max-width: 100%;
+}
+
+.o-decimal-prefix-badge-chip {
+	flex: 0 0 auto;
+	padding: 0.1em 0.5em;
+	border-radius: var(--o-decimal-badge-radius, 999px);
+	font-size: 0.85em;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.4;
+}
+
+.o-decimal-prefix-badge-file .o-decimal-prefix-badge-chip {
+	background: color-mix(
+		in srgb,
+		var(--o-decimal-fileBadge-background-color, var(--interactive-accent))
+			var(--o-decimal-fileBadge-background-opacity, 18%),
+		transparent
+	);
+	color: var(--o-decimal-fileBadge-text-color, var(--text-accent));
+}
+
+.o-decimal-prefix-badge-folder .o-decimal-prefix-badge-chip {
+	background: color-mix(
+		in srgb,
+		var(--o-decimal-folderBadge-background-color, var(--interactive-accent))
+			var(--o-decimal-folderBadge-background-opacity, 78%),
+		transparent
+	);
+	color: var(--o-decimal-folderBadge-text-color, var(--text-on-accent));
+}
+
+.o-decimal-prefix-badge-text {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: inherit;
+}
+
+.o-decimal-advanced-settings {
+	margin-top: 1rem;
+}
+
+.o-decimal-advanced-settings > summary {
+	cursor: var(--cursor);
+	color: var(--text-muted);
+}
+
+.o-decimal-advanced-settings-body {
+	margin-top: 0.75rem;
+}
+
+.o-decimal-advanced-css-input {
+	display: block;
+	width: 100%;
+	min-height: 10rem;
+	margin-top: 0.65rem;
+	padding: 0.75rem 0.9rem;
+	border-radius: var(--radius-s);
+	resize: vertical;
+	font-family: var(--font-monospace);
+	line-height: 1.5;
+}
+
+.o-decimal-advanced-css-editor {
+	width: 100%;
+}
+
+.o-decimal-advanced-css-help {
+	margin-top: 0.85rem;
+	padding: 0.75rem 0.9rem;
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+}
+
+.o-decimal-advanced-css-help-title {
+	margin-bottom: 0.5rem;
+	font-size: 0.9em;
+	font-weight: var(--font-semibold);
+	color: var(--text-normal);
+	user-select: text;
+}
+
+.o-decimal-advanced-css-help-list {
+	margin: 0;
+	padding-left: 1.25rem;
+	color: var(--text-muted);
+	line-height: 1.55;
+	user-select: text;
+}
+
+.o-decimal-advanced-css-help-list li + li {
+	margin-top: 0.45rem;
+}

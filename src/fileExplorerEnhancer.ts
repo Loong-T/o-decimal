@@ -1,10 +1,14 @@
 import { App } from "obsidian";
 import {
+	getExplorerFileItems,
 	getFileExplorerViews,
+	getExplorerDisplayName,
+	refreshExplorerTitles,
 	requestNativeExplorerSort,
 	type InternalFileExplorerView,
 	type InternalFileTreeItem,
 } from "./fileExplorer";
+import { applyPrefixDisplay, restoreRawTitle } from "./prefixDisplay";
 import type { ODecimalSettings } from "./settings";
 import { sortTreeItems } from "./treeSort";
 
@@ -80,6 +84,7 @@ export class FileExplorerEnhancer {
 
 	private refreshAll(): void {
 		for (const view of getFileExplorerViews(this.app)) {
+			refreshExplorerTitles(view);
 			requestNativeExplorerSort(view);
 		}
 	}
@@ -87,6 +92,9 @@ export class FileExplorerEnhancer {
 	private ensurePatchesInstalled(): void {
 		for (const view of getFileExplorerViews(this.app)) {
 			this.patchViewPrototype(Object.getPrototypeOf(view) as PatchedTarget);
+			for (const item of getExplorerFileItems(view)) {
+				this.patchItemPrototype(Object.getPrototypeOf(item) as PatchedTarget);
+			}
 		}
 	}
 
@@ -101,6 +109,26 @@ export class FileExplorerEnhancer {
 				}
 
 				return sortTreeItems(items, getSettings().treeItemTypePriority);
+			};
+		});
+	}
+
+	private patchItemPrototype(prototype: PatchedTarget): void {
+		const getSettings = (): ODecimalSettings => this.getSettings();
+
+		this.patchMethod(prototype, "updateTitle", (original) => {
+			return function (this: InternalFileTreeItem, ...args: unknown[]) {
+				const result = original.apply(this, args);
+				applyPrefixDisplay(this, getExplorerDisplayName(this.file), getSettings().prefixDisplayMode);
+				return result;
+			};
+		});
+
+		this.patchMethod(prototype, "startRename", (original) => {
+			return function (this: InternalFileTreeItem, ...args: unknown[]) {
+				const result = original.apply(this, args);
+				restoreRawTitle(this, getExplorerDisplayName(this.file));
+				return result;
 			};
 		});
 	}

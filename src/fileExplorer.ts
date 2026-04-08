@@ -18,8 +18,10 @@ export interface InternalFileTreeItem {
 export interface InternalFileExplorerView {
 	containerEl: HTMLElement;
 	fileItems: Record<string, InternalFileTreeItem | undefined>;
+	fileBeingRenamed?: TAbstractFile | null;
 	requestSort?: (() => void) & { cancel?: () => void };
 	getSortedFolderItems?(folder: TFolder): InternalFileTreeItem[];
+	startRenameFile?(file: TAbstractFile): Promise<void>;
 	acceptRename?(): Promise<void>;
 	exitRename?(): void;
 	onKeyEscInRename?(): void;
