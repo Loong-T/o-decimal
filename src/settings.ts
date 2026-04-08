@@ -21,6 +21,11 @@ export interface ODecimalSettings {
 	enableNumericMixedSorting: boolean;
 	treeItemTypePriority: TreeItemTypePriority;
 	prefixDisplayMode: PrefixDisplayMode;
+	showMissingPrefixBadge: boolean;
+	showHiddenFiles: boolean;
+	showHiddenItemBadge: boolean;
+	missingPrefixBadgeText: string;
+	hiddenItemBadgeText: string;
 	prefixStyles: PrefixStyleSettings;
 }
 
@@ -29,6 +34,11 @@ export const DEFAULT_SETTINGS: ODecimalSettings = {
 	enableNumericMixedSorting: true,
 	treeItemTypePriority: "mixed",
 	prefixDisplayMode: "hidden",
+	showMissingPrefixBadge: true,
+	showHiddenFiles: false,
+	showHiddenItemBadge: true,
+	missingPrefixBadgeText: "?",
+	hiddenItemBadgeText: ".",
 	prefixStyles: DEFAULT_PREFIX_STYLE_SETTINGS,
 };
 
@@ -149,11 +159,92 @@ export class ODecimalSettingTab extends PluginSettingTab {
 			);
 
 		for (const slot of PREFIX_STYLE_SLOT_DEFINITIONS) {
-			new Setting(containerEl)
-				.setName(t(`${slot.id}Heading`))
-				.setHeading();
+			const slotDetailsEl = containerEl.createEl("details", {
+				cls: "o-decimal-style-slot",
+			});
+			slotDetailsEl.createEl("summary", {
+				text: t(`${slot.id}Heading`),
+			});
+			const slotContainerEl = slotDetailsEl.createDiv(
+				"o-decimal-style-slot-body",
+			);
 
-			new Setting(containerEl)
+			if (slot.id === "warningBadge") {
+				new Setting(slotContainerEl)
+					.setName(t("showMissingPrefixBadgeName"))
+					.setDesc(t("showMissingPrefixBadgeDesc"))
+					.addToggle((toggle) =>
+						toggle
+							.setValue(
+								this.plugin.settings.showMissingPrefixBadge,
+							)
+							.onChange(async (value) => {
+								await this.plugin.applySettings({
+									showMissingPrefixBadge: value,
+								});
+							}),
+					);
+
+				new Setting(slotContainerEl)
+					.setName(t("missingPrefixBadgeTextName"))
+					.setDesc(t("missingPrefixBadgeTextDesc"))
+					.addText((text) =>
+						text
+							.setPlaceholder("?")
+							.setValue(
+								this.plugin.settings.missingPrefixBadgeText,
+							)
+							.onChange(async (value) => {
+								await this.plugin.applySettings({
+									missingPrefixBadgeText: value || "?",
+								});
+							}),
+					);
+			}
+
+			if (slot.id === "hiddenBadge") {
+				new Setting(slotContainerEl)
+					.setName(t("showHiddenFilesName"))
+					.setDesc(t("showHiddenFilesDesc"))
+					.addToggle((toggle) =>
+						toggle
+							.setValue(this.plugin.settings.showHiddenFiles)
+							.onChange(async (value) => {
+								await this.plugin.applySettings({
+									showHiddenFiles: value,
+								});
+							}),
+					);
+
+				new Setting(slotContainerEl)
+					.setName(t("showHiddenItemBadgeName"))
+					.setDesc(t("showHiddenItemBadgeDesc"))
+					.addToggle((toggle) =>
+						toggle
+							.setValue(this.plugin.settings.showHiddenItemBadge)
+							.onChange(async (value) => {
+								await this.plugin.applySettings({
+									showHiddenItemBadge: value,
+								});
+							}),
+					);
+
+				new Setting(slotContainerEl)
+					.setName(t("hiddenItemBadgeTextName"))
+					.setDesc(t("hiddenItemBadgeTextDesc"))
+					.addText((text) =>
+						text
+							.setPlaceholder(".")
+							.setValue(this.plugin.settings.hiddenItemBadgeText)
+							.onChange(async (value) => {
+								await this.plugin.applySettings({
+									hiddenItemBadgeText: value || ".",
+								});
+							}),
+					);
+			}
+
+			new Setting(slotContainerEl)
 				.setName(t("badgeBackgroundColorName"))
 				.setDesc(t("badgeBackgroundColorDesc"))
 				.addColorPicker((picker) =>
@@ -192,7 +283,7 @@ export class ODecimalSettingTab extends PluginSettingTab {
 						}),
 				);
 
-			new Setting(containerEl)
+			new Setting(slotContainerEl)
 				.setName(t("badgeTextColorName"))
 				.setDesc(t("badgeTextColorDesc"))
 				.addColorPicker((picker) =>
@@ -231,7 +322,7 @@ export class ODecimalSettingTab extends PluginSettingTab {
 						}),
 				);
 
-			new Setting(containerEl)
+			new Setting(slotContainerEl)
 				.setName(t("badgeBackgroundOpacityName"))
 				.setDesc(t("badgeBackgroundOpacityDesc"))
 				.addSlider((slider) =>
@@ -268,7 +359,9 @@ export class ODecimalSettingTab extends PluginSettingTab {
 		new Setting(advancedContainerEl)
 			.setName(t("advancedCustomCssName"))
 			.setDesc(t("advancedCustomCssDesc"));
-		const advancedCssEditorEl = advancedContainerEl.createDiv("o-decimal-advanced-css-editor");
+		const advancedCssEditorEl = advancedContainerEl.createDiv(
+			"o-decimal-advanced-css-editor",
+		);
 		const advancedCssInputEl = advancedCssEditorEl.createEl("textarea", {
 			cls: "o-decimal-advanced-css-input",
 			attr: {
@@ -277,7 +370,8 @@ export class ODecimalSettingTab extends PluginSettingTab {
 			},
 		});
 		advancedCssInputEl.placeholder = t("advancedCustomCssPlaceholder");
-		advancedCssInputEl.value = this.plugin.settings.prefixStyles.advancedCss;
+		advancedCssInputEl.value =
+			this.plugin.settings.prefixStyles.advancedCss;
 		advancedCssInputEl.addEventListener("change", async () => {
 			await this.plugin.applySettings({
 				prefixStyles: {
@@ -286,7 +380,9 @@ export class ODecimalSettingTab extends PluginSettingTab {
 				},
 			});
 		});
-		const advancedHelpEl = advancedContainerEl.createDiv("o-decimal-advanced-css-help");
+		const advancedHelpEl = advancedContainerEl.createDiv(
+			"o-decimal-advanced-css-help",
+		);
 		advancedHelpEl.createDiv({
 			cls: "o-decimal-advanced-css-help-title",
 			text: t("advancedCustomCssHelpTitle"),

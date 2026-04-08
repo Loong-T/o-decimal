@@ -103,8 +103,13 @@ export class FileExplorerEnhancer {
 
 		this.patchMethod(prototype, "getSortedFolderItems", (original) => {
 			return function (this: InternalFileExplorerView, ...args: unknown[]) {
+				const folder = args[0];
 				const items = original.apply(this, args) as InternalFileTreeItem[];
-				if (!getSettings().enableNumericMixedSorting || !Array.isArray(items)) {
+				if (!Array.isArray(items)) {
+					return items;
+				}
+
+				if (!getSettings().enableNumericMixedSorting) {
 					return items;
 				}
 
@@ -119,7 +124,13 @@ export class FileExplorerEnhancer {
 		this.patchMethod(prototype, "updateTitle", (original) => {
 			return function (this: InternalFileTreeItem, ...args: unknown[]) {
 				const result = original.apply(this, args);
-				applyPrefixDisplay(this, getExplorerDisplayName(this.file), getSettings().prefixDisplayMode);
+				applyPrefixDisplay(this, getExplorerDisplayName(this.file), {
+					prefixDisplayMode: getSettings().prefixDisplayMode,
+					showMissingPrefixBadge: getSettings().showMissingPrefixBadge,
+					showHiddenItemBadge: getSettings().showHiddenItemBadge && getSettings().showHiddenFiles,
+					hiddenItemBadgeText: getSettings().hiddenItemBadgeText,
+					missingPrefixBadgeText: getSettings().missingPrefixBadgeText,
+				});
 				return result;
 			};
 		});

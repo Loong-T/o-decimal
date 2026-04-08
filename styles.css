@@ -24,6 +24,14 @@
 	max-width: 100%;
 }
 
+.o-decimal-prefix-hidden,
+.o-decimal-prefix-has-extra-badges {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45em;
+	max-width: 100%;
+}
+
 .o-decimal-prefix-badge-chip {
 	flex: 0 0 auto;
 	padding: 0.1em 0.5em;
@@ -50,7 +58,37 @@
 			var(--o-decimal-folderBadge-background-opacity, 78%),
 		transparent
 	);
-	color: var(--o-decimal-folderBadge-text-color, var(--text-on-accent));
+	color: var(--o-decimal-folderBadge-text-color, white);
+}
+
+.o-decimal-prefix-badge-warning {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.2em;
+	text-align: center;
+	background: color-mix(
+		in srgb,
+		var(--o-decimal-warningBadge-background-color, #d9a300)
+			var(--o-decimal-warningBadge-background-opacity, 28%),
+		transparent
+	);
+	color: var(--o-decimal-warningBadge-text-color, #1f1400);
+}
+
+.o-decimal-prefix-badge-hidden-file {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.6em;
+	text-align: center;
+	background: color-mix(
+		in srgb,
+		var(--o-decimal-hiddenBadge-background-color, var(--text-muted))
+			var(--o-decimal-hiddenBadge-background-opacity, 24%),
+		transparent
+	);
+	color: var(--o-decimal-hiddenBadge-text-color, var(--text-normal));
 }
 
 .o-decimal-prefix-badge-text {
@@ -62,6 +100,23 @@
 
 .o-decimal-advanced-settings {
 	margin-top: 1rem;
+}
+
+.o-decimal-style-slot {
+	margin-top: 0.75rem;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: var(--background-primary-alt);
+}
+
+.o-decimal-style-slot > summary {
+	padding: 0.7rem 0.9rem;
+	cursor: var(--cursor);
+	color: var(--text-normal);
+}
+
+.o-decimal-style-slot-body {
+	padding: 0.15rem 0.9rem 0.85rem;
 }
 
 .o-decimal-advanced-settings > summary {

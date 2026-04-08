@@ -20,6 +20,7 @@ export interface InternalFileExplorerView {
 	fileItems: Record<string, InternalFileTreeItem | undefined>;
 	fileBeingRenamed?: TAbstractFile | null;
 	requestSort?: (() => void) & { cancel?: () => void };
+	onCreate?(file: TAbstractFile): void;
 	getSortedFolderItems?(folder: TFolder): InternalFileTreeItem[];
 	startRenameFile?(file: TAbstractFile): Promise<void>;
 	acceptRename?(): Promise<void>;

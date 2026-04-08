@@ -1,6 +1,6 @@
 export type PrefixDisplayMode = "original" | "badge" | "hidden";
 export type TreeItemTypePriority = "mixed" | "folders-first" | "files-first";
-export type PrefixStyleSlotId = "fileBadge" | "folderBadge";
+export type PrefixStyleSlotId = "fileBadge" | "folderBadge" | "warningBadge" | "hiddenBadge";
 
 export interface PrefixStyleSlotSettings {
 	backgroundColor: string;
@@ -43,22 +43,50 @@ export const PREFIX_STYLE_SLOT_DEFINITIONS: PrefixStyleSlotDefinition[] = [
 		colorPickerFallback: "#7c6cff",
 		textColorPickerFallback: "#ffffff",
 	},
+	{
+		id: "warningBadge",
+		className: "o-decimal-prefix-badge-warning",
+		defaultBackgroundColor: "#d9a300",
+		defaultTextColor: "#1f1400",
+		defaultBackgroundOpacity: 28,
+		colorPickerFallback: "#d9a300",
+		textColorPickerFallback: "#1f1400",
+	},
+	{
+		id: "hiddenBadge",
+		className: "o-decimal-prefix-badge-hidden-file",
+		defaultBackgroundColor: "var(--text-muted)",
+		defaultTextColor: "var(--text-normal)",
+		defaultBackgroundOpacity: 24,
+		colorPickerFallback: "#8a8f98",
+		textColorPickerFallback: "#d7dbe0",
+	},
 ];
 
 export const DEFAULT_PREFIX_STYLE_SETTINGS: PrefixStyleSettings = {
 	badgeRadius: 999,
-	slots: {
-		fileBadge: {
+		slots: {
+			fileBadge: {
 			backgroundColor: "",
 			textColor: "",
 			backgroundOpacity: 18,
 		},
-		folderBadge: {
-			backgroundColor: "",
-			textColor: "",
-			backgroundOpacity: 78,
+			folderBadge: {
+				backgroundColor: "",
+				textColor: "",
+				backgroundOpacity: 78,
+			},
+			warningBadge: {
+				backgroundColor: "",
+				textColor: "",
+				backgroundOpacity: 28,
+			},
+			hiddenBadge: {
+				backgroundColor: "",
+				textColor: "",
+				backgroundOpacity: 24,
+			},
 		},
-	},
 	advancedCss: "",
 };
 
@@ -73,6 +101,8 @@ export function normalizePrefixStyleSettings(
 		slots: {
 			fileBadge: normalizeSlotSettings("fileBadge", value?.slots?.fileBadge),
 			folderBadge: normalizeSlotSettings("folderBadge", value?.slots?.folderBadge),
+			warningBadge: normalizeSlotSettings("warningBadge", value?.slots?.warningBadge),
+			hiddenBadge: normalizeSlotSettings("hiddenBadge", value?.slots?.hiddenBadge),
 		},
 		advancedCss: typeof value?.advancedCss === "string" ? value.advancedCss : "",
 	};

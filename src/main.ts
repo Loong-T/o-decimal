@@ -1,5 +1,6 @@
 import { Plugin } from "obsidian";
 import { FileExplorerEnhancer } from "./fileExplorerEnhancer";
+import { HiddenFilesManager } from "./hiddenFilesManager";
 import { DEFAULT_SETTINGS, ODecimalSettingTab, type ODecimalSettings } from "./settings";
 import { normalizePrefixStyleSettings } from "./prefixStyle";
 import { StyleManager } from "./styleManager";
@@ -7,6 +8,7 @@ import { StyleManager } from "./styleManager";
 export default class ODecimalPlugin extends Plugin {
 	settings: ODecimalSettings = DEFAULT_SETTINGS;
 	private enhancer: FileExplorerEnhancer | null = null;
+	private hiddenFilesManager: HiddenFilesManager | null = null;
 	private styleManager: StyleManager | null = null;
 
 	async onload(): Promise<void> {
@@ -14,6 +16,9 @@ export default class ODecimalPlugin extends Plugin {
 
 		this.styleManager = new StyleManager();
 		this.styleManager.apply(this.settings.prefixStyles);
+
+		this.hiddenFilesManager = new HiddenFilesManager(this.app, () => this.settings);
+		this.hiddenFilesManager.start();
 
 		this.enhancer = new FileExplorerEnhancer(this.app, () => this.settings);
 		this.enhancer.start();
@@ -25,16 +30,19 @@ export default class ODecimalPlugin extends Plugin {
 		});
 		this.registerEvent(
 			this.app.vault.on("create", () => {
+				this.hiddenFilesManager?.scheduleSync();
 				this.enhancer?.scheduleRefreshAll({ requestNativeSort: true });
 			}),
 		);
 		this.registerEvent(
 			this.app.vault.on("delete", () => {
+				this.hiddenFilesManager?.scheduleSync();
 				this.enhancer?.scheduleRefreshAll({ requestNativeSort: true });
 			}),
 		);
 		this.registerEvent(
 			this.app.vault.on("rename", () => {
+				this.hiddenFilesManager?.scheduleSync();
 				this.enhancer?.scheduleRefreshAll({ requestNativeSort: true });
 			}),
 		);
@@ -43,6 +51,8 @@ export default class ODecimalPlugin extends Plugin {
 	onunload(): void {
 		this.enhancer?.stop();
 		this.enhancer = null;
+		this.hiddenFilesManager?.stop();
+		this.hiddenFilesManager = null;
 		this.styleManager?.destroy();
 		this.styleManager = null;
 	}
@@ -55,6 +65,7 @@ export default class ODecimalPlugin extends Plugin {
 		};
 		await this.saveSettings();
 		this.styleManager?.apply(this.settings.prefixStyles);
+		this.hiddenFilesManager?.scheduleSync();
 		this.enhancer?.scheduleRefreshAll({ requestNativeSort: true });
 	}
 

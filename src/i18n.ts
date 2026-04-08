@@ -17,6 +17,16 @@ type TranslationKey =
 	| "prefixDisplayModeOriginal"
 	| "prefixDisplayModeBadge"
 	| "prefixDisplayModeHidden"
+	| "showMissingPrefixBadgeName"
+	| "showMissingPrefixBadgeDesc"
+	| "missingPrefixBadgeTextName"
+	| "missingPrefixBadgeTextDesc"
+	| "showHiddenItemBadgeName"
+	| "showHiddenItemBadgeDesc"
+	| "hiddenItemBadgeTextName"
+	| "hiddenItemBadgeTextDesc"
+	| "showHiddenFilesName"
+	| "showHiddenFilesDesc"
 	| "typePriorityName"
 	| "typePriorityDesc"
 	| "typePriorityMixed"
@@ -27,6 +37,8 @@ type TranslationKey =
 	| "badgeRadiusDesc"
 	| "fileBadgeHeading"
 	| "folderBadgeHeading"
+	| "warningBadgeHeading"
+	| "hiddenBadgeHeading"
 	| "badgeBackgroundColorName"
 	| "badgeBackgroundColorDesc"
 	| "badgeTextColorName"
@@ -62,6 +74,19 @@ const TRANSLATIONS: Record<
 		prefixDisplayModeOriginal: "Original",
 		prefixDisplayModeBadge: "Badge",
 		prefixDisplayModeHidden: "Hidden",
+		showMissingPrefixBadgeName: "Show missing-prefix warning badge",
+		showMissingPrefixBadgeDesc:
+			"Adds a yellow warning-style badge to files and folders that do not have a numeric prefix.",
+		missingPrefixBadgeTextName: "Missing-prefix badge text",
+		missingPrefixBadgeTextDesc: "Customize the text shown inside the missing-prefix warning badge.",
+		showHiddenItemBadgeName: "Show hidden-item badge",
+		showHiddenItemBadgeDesc:
+			"Adds a muted gray badge to hidden items such as dotfiles and dotfolders.",
+		hiddenItemBadgeTextName: "Hidden-item badge text",
+		hiddenItemBadgeTextDesc: "Customize the text shown inside the hidden-item badge.",
+		showHiddenFilesName: "Show hidden files",
+		showHiddenFilesDesc:
+			"Reveal hidden files and folders in the file explorer. Hidden-item badges can be styled separately below.",
 		typePriorityName: "Type priority",
 		typePriorityDesc:
 			"Available only when numeric mixed sorting is enabled.",
@@ -73,6 +98,8 @@ const TRANSLATIONS: Record<
 		badgeRadiusDesc: "Controls the roundness of every generated badge.",
 		fileBadgeHeading: "File badge",
 		folderBadgeHeading: "Folder badge",
+		warningBadgeHeading: "Missing-prefix badge",
+		hiddenBadgeHeading: "Hidden-item badge",
 		badgeBackgroundColorName: "Background color",
 		badgeBackgroundColorDesc:
 			"Pick a custom badge background color, or reset to use the theme default.",
@@ -111,6 +138,19 @@ const TRANSLATIONS: Record<
 		prefixDisplayModeOriginal: "显示原名",
 		prefixDisplayModeBadge: "Badge",
 		prefixDisplayModeHidden: "隐藏前缀",
+		showMissingPrefixBadgeName: "显示无前缀警告 Badge",
+		showMissingPrefixBadgeDesc:
+			"为没有数字前缀的文件和文件夹添加黄色 warning 风格 Badge。",
+		missingPrefixBadgeTextName: "无前缀 Badge 文本",
+		missingPrefixBadgeTextDesc: "自定义无前缀警告 Badge 里的文本。",
+		showHiddenItemBadgeName: "显示隐藏项 Badge",
+		showHiddenItemBadgeDesc:
+			"为隐藏项（如点文件、点文件夹）添加灰色 Badge。",
+		hiddenItemBadgeTextName: "隐藏项 Badge 文本",
+		hiddenItemBadgeTextDesc: "自定义隐藏项 Badge 里的文本。",
+		showHiddenFilesName: "显示隐藏文件",
+		showHiddenFilesDesc:
+			"在文件树中显示隐藏文件和隐藏文件夹。它们的 Badge 样式可在下方单独调整。",
 		typePriorityName: "类型优先级",
 		typePriorityDesc: "仅在启用数字混合排序后可用。",
 		typePriorityMixed: "混排",
@@ -121,6 +161,8 @@ const TRANSLATIONS: Record<
 		badgeRadiusDesc: "控制所有自动生成的 Badge 的圆角大小。",
 		fileBadgeHeading: "文件 Badge",
 		folderBadgeHeading: "文件夹 Badge",
+		warningBadgeHeading: "无前缀 Badge",
+		hiddenBadgeHeading: "隐藏项 Badge",
 		badgeBackgroundColorName: "背景颜色",
 		badgeBackgroundColorDesc: "选择自定义背景色，或重置为主题默认色。",
 		badgeTextColorName: "文字颜色",
