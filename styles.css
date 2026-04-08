@@ -1,8 +1,18 @@
-/*
+.o-decimal-setting-disabled {
+	opacity: 0.5;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.o-decimal-setting-disabled .setting-item-name,
+.o-decimal-setting-disabled .setting-item-description,
+.o-decimal-setting-disabled .setting-item-control {
+	transition: opacity 120ms ease-in-out;
+}
 
-If your plugin does not need CSS, delete this file.
+.o-decimal-setting-disabled .setting-item-name,
+.o-decimal-setting-disabled .setting-item-description {
+	color: var(--text-faint);
+}
 
-*/
+.o-decimal-setting-disabled .setting-item-control {
+	pointer-events: none;
+}
