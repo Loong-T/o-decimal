@@ -1,8 +1,10 @@
-import { Plugin } from "obsidian";
+import { Notice, Plugin } from "obsidian";
 import { FileExplorerEnhancer } from "./fileExplorerEnhancer";
 import { HiddenFilesManager } from "./hiddenFilesManager";
+import { createTranslator } from "./i18n";
+import { DEFAULT_NUMERIC_PREFIX_PATTERN } from "./prefix";
 import { DEFAULT_SETTINGS, ODecimalSettingTab, type ODecimalSettings } from "./settings";
-import { normalizePrefixStyleSettings } from "./prefixStyle";
+import { normalizePrefixStyleSettings, type PrefixDisplayMode } from "./prefixStyle";
 import { StyleManager } from "./styleManager";
 
 export default class ODecimalPlugin extends Plugin {
@@ -23,6 +25,7 @@ export default class ODecimalPlugin extends Plugin {
 		this.enhancer = new FileExplorerEnhancer(this.app, () => this.settings);
 		this.enhancer.start();
 
+		this.registerCommands();
 		this.addSettingTab(new ODecimalSettingTab(this.app, this));
 
 		this.app.workspace.onLayoutReady(() => {
@@ -74,6 +77,11 @@ export default class ODecimalPlugin extends Plugin {
 		this.settings = {
 			...DEFAULT_SETTINGS,
 			...loadedData,
+			prefixPattern:
+				typeof loadedData?.prefixPattern === "string" &&
+				loadedData.prefixPattern.trim().length > 0
+					? loadedData.prefixPattern
+					: DEFAULT_NUMERIC_PREFIX_PATTERN,
 			prefixStyles: normalizePrefixStyleSettings(loadedData?.prefixStyles),
 		};
 	}
@@ -81,4 +89,97 @@ export default class ODecimalPlugin extends Plugin {
 	private async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 	}
+
+	private registerCommands(): void {
+		const t = createTranslator(this.settings.language);
+
+		this.addCommand({
+			id: "cycle-prefix-display-mode",
+			name: t("commandCyclePrefixDisplayName"),
+			callback: async () => {
+				const nextMode = getNextPrefixDisplayMode(this.settings.prefixDisplayMode);
+				await this.setPrefixDisplayMode(nextMode);
+			},
+		});
+
+		this.addCommand({
+			id: "set-prefix-display-original",
+			name: t("commandSetPrefixDisplayOriginalName"),
+			callback: async () => {
+				await this.setPrefixDisplayMode("original");
+			},
+		});
+
+		this.addCommand({
+			id: "set-prefix-display-badge",
+			name: t("commandSetPrefixDisplayBadgeName"),
+			callback: async () => {
+				await this.setPrefixDisplayMode("badge");
+			},
+		});
+
+		this.addCommand({
+			id: "set-prefix-display-hidden",
+			name: t("commandSetPrefixDisplayHiddenName"),
+			callback: async () => {
+				await this.setPrefixDisplayMode("hidden");
+			},
+		});
+
+		this.addCommand({
+			id: "toggle-missing-prefix-warning-badge",
+			name: t("commandToggleMissingPrefixBadgeName"),
+			callback: async () => {
+				const enabled = !this.settings.showMissingPrefixBadge;
+				await this.applySettings({
+					showMissingPrefixBadge: enabled,
+				});
+				new Notice(
+					enabled
+						? t("noticeMissingPrefixBadgeEnabled")
+						: t("noticeMissingPrefixBadgeDisabled"),
+				);
+			},
+		});
+	}
+
+	private async setPrefixDisplayMode(mode: PrefixDisplayMode): Promise<void> {
+		if (this.settings.prefixDisplayMode === mode) {
+			return;
+		}
+
+		await this.applySettings({
+			prefixDisplayMode: mode,
+		});
+
+		const t = createTranslator(this.settings.language);
+		new Notice(
+			t("noticePrefixDisplayChanged", {
+				mode: getPrefixDisplayModeLabel(t, mode),
+			}),
+		);
+	}
+}
+
+function getNextPrefixDisplayMode(current: PrefixDisplayMode): PrefixDisplayMode {
+	if (current === "original") {
+		return "badge";
+	}
+	if (current === "badge") {
+		return "hidden";
+	}
+	return "original";
+}
+
+function getPrefixDisplayModeLabel(
+	t: ReturnType<typeof createTranslator>,
+	mode: PrefixDisplayMode,
+): string {
+	if (mode === "original") {
+		return t("prefixDisplayModeOriginal");
+	}
+	if (mode === "badge") {
+		return t("prefixDisplayModeBadge");
+	}
+	return t("prefixDisplayModeHidden");
 }

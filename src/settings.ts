@@ -1,6 +1,7 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting, setIcon } from "obsidian";
 import { createTranslator, type PluginLanguage } from "./i18n";
 import type ODecimalPlugin from "./main";
+import { DEFAULT_NUMERIC_PREFIX_PATTERN } from "./prefix";
 import {
 	DEFAULT_PREFIX_STYLE_SETTINGS,
 	PREFIX_STYLE_SLOT_DEFINITIONS,
@@ -21,6 +22,7 @@ export interface ODecimalSettings {
 	enableNumericMixedSorting: boolean;
 	treeItemTypePriority: TreeItemTypePriority;
 	prefixDisplayMode: PrefixDisplayMode;
+	prefixPattern: string;
 	showMissingPrefixBadge: boolean;
 	showHiddenFiles: boolean;
 	showHiddenItemBadge: boolean;
@@ -34,6 +36,7 @@ export const DEFAULT_SETTINGS: ODecimalSettings = {
 	enableNumericMixedSorting: true,
 	treeItemTypePriority: "mixed",
 	prefixDisplayMode: "hidden",
+	prefixPattern: DEFAULT_NUMERIC_PREFIX_PATTERN,
 	showMissingPrefixBadge: true,
 	showHiddenFiles: false,
 	showHiddenItemBadge: true,
@@ -105,6 +108,125 @@ export class ODecimalSettingTab extends PluginSettingTab {
 						});
 					}),
 			);
+
+		const prefixPatternSetting = new Setting(containerEl)
+			.setName(t("prefixPatternName"))
+			.setDesc(t("prefixPatternDesc"));
+		(prefixPatternSetting as Setting & { descEl: HTMLElement }).descEl.addClass(
+			"o-decimal-prefix-pattern-desc",
+		);
+		prefixPatternSetting.addText((text) => {
+			const applyPrefixPatternValue = async (value: string): Promise<void> => {
+				text.setValue(value);
+				await this.plugin.applySettings({
+					prefixPattern: value.trim() || DEFAULT_NUMERIC_PREFIX_PATTERN,
+				});
+			};
+
+			text
+				.setPlaceholder(DEFAULT_NUMERIC_PREFIX_PATTERN)
+				.setValue(this.plugin.settings.prefixPattern)
+				.onChange(async (value) => {
+					await this.plugin.applySettings({
+						prefixPattern:
+							value.trim() || DEFAULT_NUMERIC_PREFIX_PATTERN,
+					});
+				});
+
+			text.inputEl.addClass("o-decimal-prefix-pattern-input");
+			prefixPatternSetting.controlEl.addClass("o-decimal-prefix-pattern-control");
+
+			const resetButtonEl = prefixPatternSetting.controlEl.createEl(
+				"button",
+				{
+					cls: "clickable-icon o-decimal-prefix-pattern-reset",
+					attr: {
+						type: "button",
+						"aria-label": t("prefixPatternResetTooltip"),
+					},
+				},
+			);
+			setIcon(resetButtonEl, "reset");
+			resetButtonEl.setAttribute("title", t("prefixPatternResetTooltip"));
+			prefixPatternSetting.controlEl.prepend(resetButtonEl);
+
+			resetButtonEl.addEventListener("click", async () => {
+				await applyPrefixPatternValue(DEFAULT_NUMERIC_PREFIX_PATTERN);
+			});
+
+			const presetListEl = prefixPatternSetting.controlEl.createDiv({
+				cls: "o-decimal-prefix-pattern-presets is-hidden",
+			});
+
+			const presetDefinitions = [
+				{
+					label: t("prefixPatternPresetDefault"),
+					example: t("prefixPatternPresetDefaultExample"),
+					pattern: "^(\\d+)_",
+				},
+				{
+					label: t("prefixPatternPresetBracket"),
+					example: t("prefixPatternPresetBracketExample"),
+					pattern: "^\\[(\\d+)\\]\\s*",
+				},
+				{
+					label: t("prefixPatternPresetDot"),
+					example: t("prefixPatternPresetDotExample"),
+					pattern: "^(\\d+)\\.\\s*",
+				},
+				{
+					label: t("prefixPatternPresetSegmented"),
+					example: t("prefixPatternPresetSegmentedExample"),
+					pattern: "^((?:\\d+\\.)+\\d+)\\s*",
+				},
+			];
+
+			for (const preset of presetDefinitions) {
+				const presetButtonEl = presetListEl.createEl("button", {
+					cls: "o-decimal-prefix-pattern-preset",
+					attr: {
+						type: "button",
+					},
+				});
+				const presetTextEl = presetButtonEl.createDiv({
+					cls: "o-decimal-prefix-pattern-preset-text",
+				});
+				const presetMetaEl = presetTextEl.createDiv({
+					cls: "o-decimal-prefix-pattern-preset-meta",
+				});
+				presetMetaEl.createSpan({
+					cls: "o-decimal-prefix-pattern-preset-label",
+					text: preset.label,
+				});
+				presetMetaEl.createSpan({
+					cls: "o-decimal-prefix-pattern-preset-example",
+					text: preset.example,
+				});
+				presetButtonEl.createSpan({
+					cls: "o-decimal-prefix-pattern-preset-code",
+					text: preset.pattern,
+				});
+				presetButtonEl.addEventListener("mousedown", (event) => {
+					event.preventDefault();
+				});
+				presetButtonEl.addEventListener("click", async () => {
+					await applyPrefixPatternValue(preset.pattern);
+					text.inputEl.focus();
+				});
+			}
+
+			const showPresets = (): void => {
+				presetListEl.removeClass("is-hidden");
+			};
+			const hidePresets = (): void => {
+				window.setTimeout(() => {
+					presetListEl.addClass("is-hidden");
+				}, 120);
+			};
+
+			text.inputEl.addEventListener("focus", showPresets);
+			text.inputEl.addEventListener("blur", hidePresets);
+		});
 
 		new Setting(containerEl)
 			.setName(t("enableMixedSortingName"))

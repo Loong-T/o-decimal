@@ -11,6 +11,7 @@ import {
 import { applyPrefixDisplay, restoreRawTitle } from "./prefixDisplay";
 import type { ODecimalSettings } from "./settings";
 import { sortTreeItems } from "./treeSort";
+import { createTranslator as createI18nTranslator } from "./i18n";
 
 type AnyFunction = (...args: unknown[]) => unknown;
 type PatchedTarget = Record<string, unknown>;
@@ -64,6 +65,7 @@ export class FileExplorerEnhancer {
 		}
 
 		for (const view of views) {
+			refreshExplorerTitles(view);
 			requestNativeExplorerSort(view);
 		}
 	}
@@ -113,7 +115,11 @@ export class FileExplorerEnhancer {
 					return items;
 				}
 
-				return sortTreeItems(items, getSettings().treeItemTypePriority);
+				return sortTreeItems(
+					items,
+					getSettings().treeItemTypePriority,
+					getSettings().prefixPattern,
+				);
 			};
 		});
 	}
@@ -124,12 +130,17 @@ export class FileExplorerEnhancer {
 		this.patchMethod(prototype, "updateTitle", (original) => {
 			return function (this: InternalFileTreeItem, ...args: unknown[]) {
 				const result = original.apply(this, args);
+				const t = createI18nTranslator(getSettings().language);
 				applyPrefixDisplay(this, getExplorerDisplayName(this.file), {
 					prefixDisplayMode: getSettings().prefixDisplayMode,
+					prefixPattern: getSettings().prefixPattern,
 					showMissingPrefixBadge: getSettings().showMissingPrefixBadge,
 					showHiddenItemBadge: getSettings().showHiddenItemBadge && getSettings().showHiddenFiles,
 					hiddenItemBadgeText: getSettings().hiddenItemBadgeText,
 					missingPrefixBadgeText: getSettings().missingPrefixBadgeText,
+					tooltipHiddenItem: t("tooltipHiddenItem"),
+					tooltipMissingPrefix: t("tooltipMissingPrefix"),
+					tooltipPrefixBadgeLabel: t("tooltipPrefixBadgeLabel"),
 				});
 				return result;
 			};

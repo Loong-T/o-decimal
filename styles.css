@@ -17,6 +17,98 @@
 	pointer-events: none;
 }
 
+.o-decimal-prefix-pattern-reset {
+	margin-right: 0.5rem;
+}
+
+.o-decimal-prefix-pattern-input {
+	min-width: 18rem;
+	font-family: var(--font-monospace);
+}
+
+.o-decimal-prefix-pattern-control {
+	position: relative;
+}
+
+.o-decimal-prefix-pattern-desc {
+	white-space: pre-line;
+}
+
+.o-decimal-prefix-pattern-presets {
+	position: absolute;
+	top: calc(100% + 0.45rem);
+	left: 0;
+	right: 0;
+	z-index: 20;
+	padding: 0.25rem 0;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: var(--background-primary);
+}
+
+.o-decimal-prefix-pattern-presets.is-hidden {
+	display: none;
+}
+
+.o-decimal-prefix-pattern-preset {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.5rem 0.5rem;
+	min-height: 2.4rem;
+	border: none;
+	border-radius: 0;
+	box-shadow: none !important;
+	outline: none !important;
+	text-align: left;
+	background: transparent !important;
+	appearance: none !important;
+	-webkit-appearance: none !important;
+}
+
+.o-decimal-prefix-pattern-preset:hover,
+.o-decimal-prefix-pattern-preset:focus,
+.o-decimal-prefix-pattern-preset:focus-visible,
+.o-decimal-prefix-pattern-preset:active {
+	border: none !important;
+	box-shadow: none !important;
+	outline: none !important;
+	background: var(--background-secondary) !important;
+}
+
+.o-decimal-prefix-pattern-preset-text {
+	min-width: 0;
+}
+
+.o-decimal-prefix-pattern-preset-meta {
+	display: flex;
+	align-items: baseline;
+	gap: 0.5rem;
+	min-width: 0;
+}
+
+.o-decimal-prefix-pattern-preset-label {
+	color: var(--text-normal);
+	font-weight: var(--font-medium);
+	white-space: nowrap;
+}
+
+.o-decimal-prefix-pattern-preset-example {
+	font-size: 0.85em;
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.o-decimal-prefix-pattern-preset-code {
+	flex: 0 0 auto;
+	font-family: var(--font-monospace);
+	font-size: 0.9em;
+	color: var(--text-normal);
+	white-space: nowrap;
+}
+
 .o-decimal-prefix-badge {
 	display: inline-flex;
 	align-items: center;
@@ -34,6 +126,11 @@
 
 .o-decimal-prefix-badge-chip {
 	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.2em;
+	min-height: 1.6em;
 	padding: 0.1em 0.5em;
 	border-radius: var(--o-decimal-badge-radius, 999px);
 	font-size: 0.85em;
@@ -66,6 +163,7 @@
 	align-items: center;
 	justify-content: center;
 	min-width: 2.2em;
+	min-height: 1.6em;
 	text-align: center;
 	background: color-mix(
 		in srgb,
@@ -80,7 +178,8 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 1.6em;
+	min-width: 2.2em;
+	min-height: 1.6em;
 	text-align: center;
 	background: color-mix(
 		in srgb,

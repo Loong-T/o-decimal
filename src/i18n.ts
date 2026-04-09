@@ -17,6 +17,29 @@ type TranslationKey =
 	| "prefixDisplayModeOriginal"
 	| "prefixDisplayModeBadge"
 	| "prefixDisplayModeHidden"
+	| "prefixPatternName"
+	| "prefixPatternDesc"
+	| "prefixPatternResetTooltip"
+	| "prefixPatternPresetsHint"
+	| "prefixPatternPresetDefault"
+	| "prefixPatternPresetDefaultExample"
+	| "prefixPatternPresetBracket"
+	| "prefixPatternPresetBracketExample"
+	| "prefixPatternPresetDot"
+	| "prefixPatternPresetDotExample"
+	| "prefixPatternPresetSegmented"
+	| "prefixPatternPresetSegmentedExample"
+	| "tooltipHiddenItem"
+	| "tooltipMissingPrefix"
+	| "tooltipPrefixBadgeLabel"
+	| "commandCyclePrefixDisplayName"
+	| "commandSetPrefixDisplayOriginalName"
+	| "commandSetPrefixDisplayBadgeName"
+	| "commandSetPrefixDisplayHiddenName"
+	| "commandToggleMissingPrefixBadgeName"
+	| "noticePrefixDisplayChanged"
+	| "noticeMissingPrefixBadgeEnabled"
+	| "noticeMissingPrefixBadgeDisabled"
 	| "showMissingPrefixBadgeName"
 	| "showMissingPrefixBadgeDesc"
 	| "missingPrefixBadgeTextName"
@@ -74,19 +97,47 @@ const TRANSLATIONS: Record<
 		prefixDisplayModeOriginal: "Original",
 		prefixDisplayModeBadge: "Badge",
 		prefixDisplayModeHidden: "Hidden",
+		prefixPatternName: "Prefix regex",
+		prefixPatternDesc:
+			"Use a regex to detect the prefix.\nIf your regex includes parentheses, the text inside the first pair will be shown in the badge.\nIf it is invalid, the default rule ^(\\d+)_ will be used instead.",
+		prefixPatternResetTooltip: "Reset to default regex",
+		prefixPatternPresetsHint: "Common examples",
+		prefixPatternPresetDefault: "Number + underscore",
+		prefixPatternPresetDefaultExample: "Example: 03_Project",
+		prefixPatternPresetBracket: "Number inside brackets",
+		prefixPatternPresetBracketExample: "Example: [23] Project",
+		prefixPatternPresetDot: "Number + dot",
+		prefixPatternPresetDotExample: "Example: 03. Project",
+		prefixPatternPresetSegmented: "Dot-separated numbers",
+		prefixPatternPresetSegmentedExample: "Example: 02.389 Project",
+		tooltipHiddenItem: "Hidden item",
+		tooltipMissingPrefix: "Missing prefix",
+		tooltipPrefixBadgeLabel: "Prefix",
+		commandCyclePrefixDisplayName: "Prefix display: Cycle",
+		commandSetPrefixDisplayOriginalName: "Prefix display: Original",
+		commandSetPrefixDisplayBadgeName: "Prefix display: Badge",
+		commandSetPrefixDisplayHiddenName: "Prefix display: Hidden",
+		commandToggleMissingPrefixBadgeName:
+			"Warning badge: Toggle missing prefix",
+		noticePrefixDisplayChanged: "Prefix display: {{mode}}",
+		noticeMissingPrefixBadgeEnabled: "Missing-prefix warning badge enabled",
+		noticeMissingPrefixBadgeDisabled:
+			"Missing-prefix warning badge disabled",
 		showMissingPrefixBadgeName: "Show missing-prefix warning badge",
 		showMissingPrefixBadgeDesc:
 			"Adds a yellow warning-style badge to files and folders that do not have a numeric prefix.",
 		missingPrefixBadgeTextName: "Missing-prefix badge text",
-		missingPrefixBadgeTextDesc: "Customize the text shown inside the missing-prefix warning badge.",
+		missingPrefixBadgeTextDesc:
+			"Customize the text shown inside the missing-prefix warning badge.",
 		showHiddenItemBadgeName: "Show hidden-item badge",
 		showHiddenItemBadgeDesc:
 			"Adds a muted gray badge to hidden items such as dotfiles and dotfolders.",
 		hiddenItemBadgeTextName: "Hidden-item badge text",
-		hiddenItemBadgeTextDesc: "Customize the text shown inside the hidden-item badge.",
+		hiddenItemBadgeTextDesc:
+			"Customize the text shown inside the hidden-item badge.",
 		showHiddenFilesName: "Show hidden files",
 		showHiddenFilesDesc:
-			"Reveal hidden files and folders in the file explorer. Hidden-item badges can be styled separately below.",
+			"Reveal hidden files and folders in the file explorer. Toggling this may lag in large vaults. Hidden-item badges can be styled separately below.",
 		typePriorityName: "Type priority",
 		typePriorityDesc:
 			"Available only when numeric mixed sorting is enabled.",
@@ -138,6 +189,30 @@ const TRANSLATIONS: Record<
 		prefixDisplayModeOriginal: "显示原名",
 		prefixDisplayModeBadge: "Badge",
 		prefixDisplayModeHidden: "隐藏前缀",
+		prefixPatternName: "前缀正则",
+		prefixPatternDesc:
+			"用正则表达式识别前缀。\n如果正则里有括号，第一组括号匹配到的内容会显示在 Badge 里。\n如果填写无效，会自动改用默认规则 `^(\\\\d+)_`。",
+		prefixPatternResetTooltip: "重置为默认正则",
+		prefixPatternPresetsHint: "常用示例",
+		prefixPatternPresetDefault: "数字加下划线",
+		prefixPatternPresetDefaultExample: "例：03_名称",
+		prefixPatternPresetBracket: "方括号里的数字",
+		prefixPatternPresetBracketExample: "例：[23] 名称",
+		prefixPatternPresetDot: "数字加点号",
+		prefixPatternPresetDotExample: "例：03. 名称",
+		prefixPatternPresetSegmented: "点分隔数字",
+		prefixPatternPresetSegmentedExample: "例：02.389 名称",
+		tooltipHiddenItem: "隐藏项",
+		tooltipMissingPrefix: "缺少前缀",
+		tooltipPrefixBadgeLabel: "前缀",
+		commandCyclePrefixDisplayName: "前缀显示：循环切换",
+		commandSetPrefixDisplayOriginalName: "前缀显示：显示原名",
+		commandSetPrefixDisplayBadgeName: "前缀显示：Badge",
+		commandSetPrefixDisplayHiddenName: "前缀显示：隐藏前缀",
+		commandToggleMissingPrefixBadgeName: "无前缀警告 Badge 切换",
+		noticePrefixDisplayChanged: "前缀显示：{{mode}}",
+		noticeMissingPrefixBadgeEnabled: "已开启无前缀警告 Badge",
+		noticeMissingPrefixBadgeDisabled: "已关闭无前缀警告 Badge",
 		showMissingPrefixBadgeName: "显示无前缀警告 Badge",
 		showMissingPrefixBadgeDesc:
 			"为没有数字前缀的文件和文件夹添加黄色 warning 风格 Badge。",
@@ -150,7 +225,7 @@ const TRANSLATIONS: Record<
 		hiddenItemBadgeTextDesc: "自定义隐藏项 Badge 里的文本。",
 		showHiddenFilesName: "显示隐藏文件",
 		showHiddenFilesDesc:
-			"在文件树中显示隐藏文件和隐藏文件夹。它们的 Badge 样式可在下方单独调整。",
+			"在文件树中显示隐藏文件和隐藏文件夹。大型仓库中切换此选项时可能会有卡顿。它们的 Badge 样式可在下方单独调整。",
 		typePriorityName: "类型优先级",
 		typePriorityDesc: "仅在启用数字混合排序后可用。",
 		typePriorityMixed: "混排",
@@ -186,7 +261,21 @@ const TRANSLATIONS: Record<
 
 export function createTranslator(language: PluginLanguage) {
 	const resolvedLanguage = resolveLanguage(language);
-	return (key: TranslationKey): string => TRANSLATIONS[resolvedLanguage][key];
+	return (
+		key: TranslationKey,
+		replacements?: Record<string, string>,
+	): string => {
+		let text = TRANSLATIONS[resolvedLanguage][key];
+		if (!replacements) {
+			return text;
+		}
+
+		for (const [token, value] of Object.entries(replacements)) {
+			text = text.split(`{{${token}}}`).join(value);
+		}
+
+		return text;
+	};
 }
 
 export function resolveLanguage(language: PluginLanguage): SupportedLanguage {

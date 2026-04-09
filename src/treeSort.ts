@@ -7,6 +7,7 @@ import type { TreeItemTypePriority } from "./settings";
 export function sortTreeItems(
 	items: InternalFileTreeItem[],
 	typePriority: TreeItemTypePriority,
+	prefixPattern: string,
 ): InternalFileTreeItem[] {
 	return items
 		.map((item, index) => ({
@@ -20,7 +21,11 @@ export function sortTreeItems(
 				return typeComparison;
 			}
 
-			const comparison = comparePrefixedNames(a.displayName, b.displayName);
+			const comparison = comparePrefixedNames(
+				a.displayName,
+				b.displayName,
+				prefixPattern,
+			);
 			return comparison !== 0 ? comparison : a.index - b.index;
 		})
 		.map(({ item }) => item);

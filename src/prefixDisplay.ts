@@ -10,20 +10,25 @@ interface ExtraBadgeDescriptor {
 	tooltip: string;
 }
 
+interface PrefixDisplaySettings {
+	prefixDisplayMode: ODecimalSettings["prefixDisplayMode"];
+	prefixPattern: ODecimalSettings["prefixPattern"];
+	showMissingPrefixBadge: ODecimalSettings["showMissingPrefixBadge"];
+	showHiddenItemBadge: ODecimalSettings["showHiddenItemBadge"];
+	hiddenItemBadgeText: ODecimalSettings["hiddenItemBadgeText"];
+	missingPrefixBadgeText: ODecimalSettings["missingPrefixBadgeText"];
+	tooltipHiddenItem: string;
+	tooltipMissingPrefix: string;
+	tooltipPrefixBadgeLabel: string;
+}
+
 export function applyPrefixDisplay(
 	item: InternalFileTreeItem,
 	rawTitle: string,
-	settings: Pick<
-		ODecimalSettings,
-		| "prefixDisplayMode"
-		| "showMissingPrefixBadge"
-		| "showHiddenItemBadge"
-		| "hiddenItemBadgeText"
-		| "missingPrefixBadgeText"
-	>,
+	settings: PrefixDisplaySettings,
 ): void {
 	const { innerEl } = item;
-	const prefixMatch = parseNumericPrefix(rawTitle);
+	const prefixMatch = parseNumericPrefix(rawTitle, settings.prefixPattern);
 	const prefixBadgeKindClass = item.file instanceof TFolder
 		? "o-decimal-prefix-badge-folder"
 		: "o-decimal-prefix-badge-file";
@@ -38,17 +43,22 @@ export function applyPrefixDisplay(
 		"o-decimal-prefix-has-extra-badges",
 	);
 	innerEl.removeAttribute("data-o-decimal-prefix");
+	innerEl.setAttribute("title", rawTitle);
 
 	if (!prefixMatch || settings.prefixDisplayMode === "original") {
 		renderBadges(innerEl, extraBadges);
-		appendTitleText(innerEl, rawTitle);
+		appendTitleText(innerEl, rawTitle, rawTitle);
 		return;
 	}
 
 	if (settings.prefixDisplayMode === "hidden") {
 		innerEl.addClass("o-decimal-prefix-hidden");
 		renderBadges(innerEl, extraBadges);
-		appendTitleText(innerEl, stripNumericPrefix(rawTitle));
+		appendTitleText(
+			innerEl,
+			stripNumericPrefix(rawTitle, settings.prefixPattern),
+			rawTitle,
+		);
 		return;
 	}
 
@@ -57,10 +67,10 @@ export function applyPrefixDisplay(
 	renderBadges(innerEl, extraBadges);
 	innerEl.createSpan({
 		cls: "o-decimal-prefix-badge-chip",
-		text: prefixMatch.rawPrefix.slice(0, -1),
-		title: prefixMatch.rawPrefix,
+		text: prefixMatch.badgeText,
+		title: `${settings.tooltipPrefixBadgeLabel}: ${prefixMatch.rawPrefix}`,
 	});
-	appendTitleText(innerEl, prefixMatch.rest);
+	appendTitleText(innerEl, prefixMatch.rest, rawTitle);
 }
 
 export function restoreRawTitle(item: InternalFileTreeItem, rawTitle: string): void {
@@ -70,6 +80,7 @@ export function restoreRawTitle(item: InternalFileTreeItem, rawTitle: string): v
 		"o-decimal-prefix-badge",
 		"o-decimal-prefix-badge-file",
 		"o-decimal-prefix-badge-folder",
+		"o-decimal-prefix-has-extra-badges",
 	);
 	item.innerEl.removeAttribute("data-o-decimal-prefix");
 	item.innerEl.setText(rawTitle);
@@ -79,15 +90,27 @@ function getExtraBadges(
 	item: InternalFileTreeItem,
 	rawTitle: string,
 	prefixMatch: ReturnType<typeof parseNumericPrefix>,
-	settings: Pick<ODecimalSettings, "prefixDisplayMode" | "showMissingPrefixBadge" | "showHiddenItemBadge">,
-	badgeTextSettings: Pick<ODecimalSettings, "hiddenItemBadgeText" | "missingPrefixBadgeText">,
+	settings: Pick<
+		PrefixDisplaySettings,
+		| "prefixDisplayMode"
+		| "prefixPattern"
+		| "showMissingPrefixBadge"
+		| "showHiddenItemBadge"
+	>,
+	badgeTextSettings: Pick<
+		PrefixDisplaySettings,
+		| "hiddenItemBadgeText"
+		| "missingPrefixBadgeText"
+		| "tooltipHiddenItem"
+		| "tooltipMissingPrefix"
+	>,
 ): ExtraBadgeDescriptor[] {
 	if (settings.showHiddenItemBadge && isHiddenItem(rawTitle)) {
 		return [
 			{
-			slotClass: "o-decimal-prefix-badge-hidden-file",
-			text: badgeTextSettings.hiddenItemBadgeText,
-			tooltip: "Hidden item",
+				slotClass: "o-decimal-prefix-badge-hidden-file",
+				text: badgeTextSettings.hiddenItemBadgeText,
+				tooltip: badgeTextSettings.tooltipHiddenItem,
 			},
 		];
 	}
@@ -95,9 +118,9 @@ function getExtraBadges(
 	if (settings.showMissingPrefixBadge && !prefixMatch) {
 		return [
 			{
-			slotClass: "o-decimal-prefix-badge-warning",
-			text: badgeTextSettings.missingPrefixBadgeText,
-			tooltip: "Missing numeric prefix",
+				slotClass: "o-decimal-prefix-badge-warning",
+				text: badgeTextSettings.missingPrefixBadgeText,
+				tooltip: badgeTextSettings.tooltipMissingPrefix,
 			},
 		];
 	}
@@ -124,9 +147,10 @@ function renderBadges(innerEl: HTMLElement, badges: ExtraBadgeDescriptor[]): voi
 	}
 }
 
-function appendTitleText(innerEl: HTMLElement, text: string): void {
+function appendTitleText(innerEl: HTMLElement, text: string, rawTitle: string): void {
 	innerEl.createSpan({
 		cls: "o-decimal-prefix-badge-text",
 		text,
+		title: rawTitle,
 	});
 }
