@@ -150,8 +150,8 @@ export class ODecimalSettingTab extends PluginSettingTab {
 			resetButtonEl.setAttribute("title", t("prefixPatternResetTooltip"));
 			prefixPatternSetting.controlEl.prepend(resetButtonEl);
 
-			resetButtonEl.addEventListener("click", async () => {
-				await applyPrefixPatternValue(DEFAULT_NUMERIC_PREFIX_PATTERN);
+			resetButtonEl.addEventListener("click", () => {
+				void applyPrefixPatternValue(DEFAULT_NUMERIC_PREFIX_PATTERN);
 			});
 
 			const presetListEl = prefixPatternSetting.controlEl.createDiv({
@@ -209,9 +209,10 @@ export class ODecimalSettingTab extends PluginSettingTab {
 				presetButtonEl.addEventListener("mousedown", (event) => {
 					event.preventDefault();
 				});
-				presetButtonEl.addEventListener("click", async () => {
-					await applyPrefixPatternValue(preset.pattern);
-					text.inputEl.focus();
+				presetButtonEl.addEventListener("click", () => {
+					void applyPrefixPatternValue(preset.pattern).then(() => {
+						text.inputEl.focus();
+					});
 				});
 			}
 
@@ -494,8 +495,8 @@ export class ODecimalSettingTab extends PluginSettingTab {
 		advancedCssInputEl.placeholder = t("advancedCustomCssPlaceholder");
 		advancedCssInputEl.value =
 			this.plugin.settings.prefixStyles.advancedCss;
-		advancedCssInputEl.addEventListener("change", async () => {
-			await this.plugin.applySettings({
+		advancedCssInputEl.addEventListener("change", () => {
+			void this.plugin.applySettings({
 				prefixStyles: {
 					...this.plugin.settings.prefixStyles,
 					advancedCss: advancedCssInputEl.value,

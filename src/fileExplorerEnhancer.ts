@@ -105,7 +105,6 @@ export class FileExplorerEnhancer {
 
 		this.patchMethod(prototype, "getSortedFolderItems", (original) => {
 			return function (this: InternalFileExplorerView, ...args: unknown[]) {
-				const folder = args[0];
 				const items = original.apply(this, args) as InternalFileTreeItem[];
 				if (!Array.isArray(items)) {
 					return items;

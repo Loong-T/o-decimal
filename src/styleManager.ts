@@ -21,6 +21,7 @@ export class StyleManager {
 			return this.styleEl;
 		}
 
+		// eslint-disable-next-line obsidianmd/no-forbidden-elements
 		const styleEl = document.head.createEl("style");
 		styleEl.id = STYLE_ELEMENT_ID;
 		this.styleEl = styleEl;

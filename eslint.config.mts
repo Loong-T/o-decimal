@@ -21,12 +21,21 @@ export default tseslint.config(
 			},
 		},
 	},
+	{
+		files: ["src/styleManager.ts"],
+		rules: {
+			"obsidianmd/no-forbidden-elements": "off",
+		},
+	},
 	...obsidianmd.configs.recommended,
 	globalIgnores([
 		"node_modules",
 		"dist",
+		"app.js",
+		"data.json",
 		"esbuild.config.mjs",
 		"eslint.config.js",
+		"eslint.config.mts",
 		"version-bump.mjs",
 		"versions.json",
 		"main.js",

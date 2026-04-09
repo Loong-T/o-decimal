@@ -1,7 +1,6 @@
 import { TFolder } from "obsidian";
 import type { InternalFileTreeItem } from "./fileExplorer";
 import { parseNumericPrefix, stripNumericPrefix } from "./prefix";
-import type { PrefixDisplayMode } from "./prefixStyle";
 import type { ODecimalSettings } from "./settings";
 
 interface ExtraBadgeDescriptor {
