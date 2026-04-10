@@ -1,7 +1,7 @@
 {
 	"id": "nerd-is-in-o-decimal",
 	"name": "O Decimal",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "1.10.0",
 	"description": "Display cleanup, badges, and mixed sorting for numeric and Johnny.Decimal-style prefixes in the Obsidian file explorer.",
 	"author": "loong_t",
