@@ -23,6 +23,8 @@ type TranslationKey =
 	| "prefixPatternPresetsHint"
 	| "prefixPatternPresetDefault"
 	| "prefixPatternPresetDefaultExample"
+	| "prefixPatternPresetRange"
+	| "prefixPatternPresetRangeExample"
 	| "prefixPatternPresetBracket"
 	| "prefixPatternPresetBracketExample"
 	| "prefixPatternPresetDot"
@@ -99,11 +101,13 @@ const TRANSLATIONS: Record<
 		prefixDisplayModeHidden: "Hidden",
 		prefixPatternName: "Prefix regex",
 		prefixPatternDesc:
-			"Use a regex to detect the prefix.\nIf your regex includes parentheses, the text inside the first pair will be shown in the badge.\nIf it is invalid, the default rule ^(\\d+)_ will be used instead.",
+			"Use one regex rule per line to detect prefixes.\nRules are tried from top to bottom.\nIf a rule includes parentheses, the text inside the first capture group will be shown in the badge.\nIf every rule is invalid, the default rules for 03_Project and 00-09_Project will be used instead.",
 		prefixPatternResetTooltip: "Reset to default regex",
 		prefixPatternPresetsHint: "Common examples",
 		prefixPatternPresetDefault: "Number + underscore",
 		prefixPatternPresetDefaultExample: "Example: 03_Project",
+		prefixPatternPresetRange: "Numeric range + underscore",
+		prefixPatternPresetRangeExample: "Example: 00-09_Project",
 		prefixPatternPresetBracket: "Number inside brackets",
 		prefixPatternPresetBracketExample: "Example: [23] Project",
 		prefixPatternPresetDot: "Number + dot",
@@ -191,11 +195,13 @@ const TRANSLATIONS: Record<
 		prefixDisplayModeHidden: "隐藏前缀",
 		prefixPatternName: "前缀正则",
 		prefixPatternDesc:
-			"用正则表达式识别前缀。\n如果正则里有括号，第一组括号匹配到的内容会显示在 Badge 里。\n如果填写无效，会自动改用默认规则 `^(\\\\d+)_`。",
+			"每行填写一条正则规则，用来识别前缀。\n插件会从上到下依次尝试匹配。\n如果规则里有括号，第一捕获组匹配到的内容会显示在 Badge 里。\n如果所有规则都无效，会自动改用覆盖 `03_Project` 和 `00-09_Project` 的默认规则。",
 		prefixPatternResetTooltip: "重置为默认正则",
 		prefixPatternPresetsHint: "常用示例",
 		prefixPatternPresetDefault: "数字加下划线",
 		prefixPatternPresetDefaultExample: "例：03_名称",
+		prefixPatternPresetRange: "数字范围加下划线",
+		prefixPatternPresetRangeExample: "例：00-09_名称",
 		prefixPatternPresetBracket: "方括号里的数字",
 		prefixPatternPresetBracketExample: "例：[23] 名称",
 		prefixPatternPresetDot: "数字加点号",

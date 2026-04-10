@@ -48,9 +48,12 @@
 
 可以自定义“什么样的前缀会被识别”。
 
-- 默认规则：`^(\d+)_`
-- 支持在设置中直接填写正则
+- 默认规则：
+  - `^(\d+)_`
+  - `^((?:\d+-\d+))_`
+- 支持在设置中按“每行一条规则”填写多个正则
 - 输入框聚焦时会出现常用示例补全
+- 规则会从上到下依次匹配
 - 如果正则里有第一组括号，括号匹配到的内容会显示在 Badge 中
 
 #### 4. 无前缀 / 隐藏项 Badge
@@ -143,10 +146,25 @@ pnpm build
 
 #### 前缀正则示例
 
-插件内置了常见示例补全，例如：
+插件内置了常见示例补全，也支持把多条规则写成多行，例如：
+
+```text
+^(\d+)_
+^((?:\d+-\d+))_
+```
+
+上面这组默认规则会同时覆盖：
+
+- `03_Project`
+- `00-09_Project`
+- `02-389_Project`
+
+其他常见示例包括：
 
 - `^(\d+)_`
   - 例：`03_Project`
+- `^((?:\d+-\d+))_`
+  - 例：`00-09_Project`
 - `^\[(\d+)\]\s*`
   - 例：`[23] Project`
 - `^(\d+)\.\s*`
@@ -239,11 +257,14 @@ Example:
 
 #### 3. Custom prefix regex
 
-You can define your own prefix-matching rule.
+You can define your own prefix-matching rules.
 
-- Default pattern: `^(\d+)_`
-- Editable in settings
+- Default rules:
+  - `^(\d+)_`
+  - `^((?:\d+-\d+))_`
+- Editable in settings with one regex per line
 - Built-in preset suggestions appear when the input is focused
+- Rules are tried from top to bottom
 - If the regex contains a first capture group, that captured text is shown inside the badge
 
 #### 4. Missing-prefix and hidden-item badges
@@ -334,10 +355,25 @@ You can configure:
 
 #### Prefix regex examples
 
-Built-in preset examples include:
+Built-in preset examples include multi-line rules like:
+
+```text
+^(\d+)_
+^((?:\d+-\d+))_
+```
+
+Those default rules cover:
+
+- `03_Project`
+- `00-09_Project`
+- `02-389_Project`
+
+Other common examples include:
 
 - `^(\d+)_`
   - Example: `03_Project`
+- `^((?:\d+-\d+))_`
+  - Example: `00-09_Project`
 - `^\[(\d+)\]\s*`
   - Example: `[23] Project`
 - `^(\d+)\.\s*`

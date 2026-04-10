@@ -18,16 +18,27 @@
 }
 
 .o-decimal-prefix-pattern-reset {
-	margin-right: 0.5rem;
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	z-index: 1;
 }
 
 .o-decimal-prefix-pattern-input {
+	display: block;
+	width: 100%;
 	min-width: 18rem;
+	min-height: 7.5rem;
+	padding: 0.75rem 2.5rem 0.75rem 0.9rem;
+	border-radius: var(--radius-s);
+	resize: vertical;
 	font-family: var(--font-monospace);
+	line-height: 1.5;
 }
 
 .o-decimal-prefix-pattern-control {
 	position: relative;
+	width: 100%;
 }
 
 .o-decimal-prefix-pattern-desc {

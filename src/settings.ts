@@ -1,7 +1,10 @@
 import { App, PluginSettingTab, Setting, setIcon } from "obsidian";
 import { createTranslator, type PluginLanguage } from "./i18n";
 import type ODecimalPlugin from "./main";
-import { DEFAULT_NUMERIC_PREFIX_PATTERN } from "./prefix";
+import {
+	DEFAULT_NUMERIC_PREFIX_PATTERN,
+	normalizePrefixPatternSource,
+} from "./prefix";
 import {
 	DEFAULT_PREFIX_STYLE_SETTINGS,
 	PREFIX_STYLE_SLOT_DEFINITIONS,
@@ -115,119 +118,130 @@ export class ODecimalSettingTab extends PluginSettingTab {
 		(prefixPatternSetting as Setting & { descEl: HTMLElement }).descEl.addClass(
 			"o-decimal-prefix-pattern-desc",
 		);
-		prefixPatternSetting.addText((text) => {
-			const applyPrefixPatternValue = async (value: string): Promise<void> => {
-				text.setValue(value);
-				await this.plugin.applySettings({
-					prefixPattern: value.trim() || DEFAULT_NUMERIC_PREFIX_PATTERN,
-				});
-			};
-
-			text
-				.setPlaceholder(DEFAULT_NUMERIC_PREFIX_PATTERN)
-				.setValue(this.plugin.settings.prefixPattern)
-				.onChange(async (value) => {
-					await this.plugin.applySettings({
-						prefixPattern:
-							value.trim() || DEFAULT_NUMERIC_PREFIX_PATTERN,
-					});
-				});
-
-			text.inputEl.addClass("o-decimal-prefix-pattern-input");
-			prefixPatternSetting.controlEl.addClass("o-decimal-prefix-pattern-control");
-
-			const resetButtonEl = prefixPatternSetting.controlEl.createEl(
-				"button",
-				{
-					cls: "clickable-icon o-decimal-prefix-pattern-reset",
-					attr: {
-						type: "button",
-						"aria-label": t("prefixPatternResetTooltip"),
-					},
-				},
-			);
-			setIcon(resetButtonEl, "reset");
-			resetButtonEl.setAttribute("title", t("prefixPatternResetTooltip"));
-			prefixPatternSetting.controlEl.prepend(resetButtonEl);
-
-			resetButtonEl.addEventListener("click", () => {
-				void applyPrefixPatternValue(DEFAULT_NUMERIC_PREFIX_PATTERN);
+		prefixPatternSetting.controlEl.addClass("o-decimal-prefix-pattern-control");
+		const applyPrefixPatternValue = async (value: string): Promise<void> => {
+			const normalizedValue = normalizePrefixPatternSource(value);
+			prefixPatternInputEl.value = normalizedValue;
+			await this.plugin.applySettings({
+				prefixPattern: normalizedValue,
 			});
-
-			const presetListEl = prefixPatternSetting.controlEl.createDiv({
-				cls: "o-decimal-prefix-pattern-presets is-hidden",
-			});
-
-			const presetDefinitions = [
-				{
-					label: t("prefixPatternPresetDefault"),
-					example: t("prefixPatternPresetDefaultExample"),
-					pattern: "^(\\d+)_",
+		};
+		const prefixPatternInputEl = prefixPatternSetting.controlEl.createEl(
+			"textarea",
+			{
+				cls: "o-decimal-prefix-pattern-input",
+				attr: {
+					rows: 4,
+					spellcheck: "false",
 				},
-				{
-					label: t("prefixPatternPresetBracket"),
-					example: t("prefixPatternPresetBracketExample"),
-					pattern: "^\\[(\\d+)\\]\\s*",
-				},
-				{
-					label: t("prefixPatternPresetDot"),
-					example: t("prefixPatternPresetDotExample"),
-					pattern: "^(\\d+)\\.\\s*",
-				},
-				{
-					label: t("prefixPatternPresetSegmented"),
-					example: t("prefixPatternPresetSegmentedExample"),
-					pattern: "^((?:\\d+\\.)+\\d+)\\s*",
-				},
-			];
-
-			for (const preset of presetDefinitions) {
-				const presetButtonEl = presetListEl.createEl("button", {
-					cls: "o-decimal-prefix-pattern-preset",
-					attr: {
-						type: "button",
-					},
-				});
-				const presetTextEl = presetButtonEl.createDiv({
-					cls: "o-decimal-prefix-pattern-preset-text",
-				});
-				const presetMetaEl = presetTextEl.createDiv({
-					cls: "o-decimal-prefix-pattern-preset-meta",
-				});
-				presetMetaEl.createSpan({
-					cls: "o-decimal-prefix-pattern-preset-label",
-					text: preset.label,
-				});
-				presetMetaEl.createSpan({
-					cls: "o-decimal-prefix-pattern-preset-example",
-					text: preset.example,
-				});
-				presetButtonEl.createSpan({
-					cls: "o-decimal-prefix-pattern-preset-code",
-					text: preset.pattern,
-				});
-				presetButtonEl.addEventListener("mousedown", (event) => {
-					event.preventDefault();
-				});
-				presetButtonEl.addEventListener("click", () => {
-					void applyPrefixPatternValue(preset.pattern).then(() => {
-						text.inputEl.focus();
-					});
-				});
-			}
-
-			const showPresets = (): void => {
-				presetListEl.removeClass("is-hidden");
-			};
-			const hidePresets = (): void => {
-				window.setTimeout(() => {
-					presetListEl.addClass("is-hidden");
-				}, 120);
-			};
-
-			text.inputEl.addEventListener("focus", showPresets);
-			text.inputEl.addEventListener("blur", hidePresets);
+			},
+		);
+		prefixPatternInputEl.placeholder = DEFAULT_NUMERIC_PREFIX_PATTERN;
+		prefixPatternInputEl.value = normalizePrefixPatternSource(
+			this.plugin.settings.prefixPattern,
+		);
+		prefixPatternInputEl.addEventListener("change", () => {
+			void applyPrefixPatternValue(prefixPatternInputEl.value);
 		});
+
+		const resetButtonEl = prefixPatternSetting.controlEl.createEl("button", {
+			cls: "clickable-icon o-decimal-prefix-pattern-reset",
+			attr: {
+				type: "button",
+				"aria-label": t("prefixPatternResetTooltip"),
+			},
+		});
+		setIcon(resetButtonEl, "reset");
+		resetButtonEl.setAttribute("title", t("prefixPatternResetTooltip"));
+		prefixPatternSetting.controlEl.prepend(resetButtonEl);
+
+		resetButtonEl.addEventListener("click", () => {
+			void applyPrefixPatternValue(DEFAULT_NUMERIC_PREFIX_PATTERN);
+		});
+
+		const presetListEl = prefixPatternSetting.controlEl.createDiv({
+			cls: "o-decimal-prefix-pattern-presets is-hidden",
+		});
+
+		const presetDefinitions = [
+			{
+				label: t("prefixPatternPresetDefault"),
+				example: t("prefixPatternPresetDefaultExample"),
+				pattern: "^(\\d+)_",
+			},
+			{
+				label: t("prefixPatternPresetRange"),
+				example: t("prefixPatternPresetRangeExample"),
+				pattern: "^((?:\\d+-\\d+))_",
+			},
+			{
+				label: t("prefixPatternPresetBracket"),
+				example: t("prefixPatternPresetBracketExample"),
+				pattern: "^\\[(\\d+)\\]\\s*",
+			},
+			{
+				label: t("prefixPatternPresetDot"),
+				example: t("prefixPatternPresetDotExample"),
+				pattern: "^(\\d+)\\.\\s*",
+			},
+			{
+				label: t("prefixPatternPresetSegmented"),
+				example: t("prefixPatternPresetSegmentedExample"),
+				pattern: "^((?:\\d+\\.)+\\d+)\\s*",
+			},
+		];
+
+		for (const preset of presetDefinitions) {
+			const presetButtonEl = presetListEl.createEl("button", {
+				cls: "o-decimal-prefix-pattern-preset",
+				attr: {
+					type: "button",
+				},
+			});
+			const presetTextEl = presetButtonEl.createDiv({
+				cls: "o-decimal-prefix-pattern-preset-text",
+			});
+			const presetMetaEl = presetTextEl.createDiv({
+				cls: "o-decimal-prefix-pattern-preset-meta",
+			});
+			presetMetaEl.createSpan({
+				cls: "o-decimal-prefix-pattern-preset-label",
+				text: preset.label,
+			});
+			presetMetaEl.createSpan({
+				cls: "o-decimal-prefix-pattern-preset-example",
+				text: preset.example,
+			});
+			presetButtonEl.createSpan({
+				cls: "o-decimal-prefix-pattern-preset-code",
+				text: preset.pattern,
+			});
+			presetButtonEl.addEventListener("mousedown", (event) => {
+				event.preventDefault();
+			});
+			presetButtonEl.addEventListener("click", () => {
+				void applyPrefixPatternValue(
+					appendPrefixPatternRule(
+						prefixPatternInputEl.value,
+						preset.pattern,
+					),
+				).then(() => {
+					prefixPatternInputEl.focus();
+				});
+			});
+		}
+
+		const showPresets = (): void => {
+			presetListEl.removeClass("is-hidden");
+		};
+		const hidePresets = (): void => {
+			window.setTimeout(() => {
+				presetListEl.addClass("is-hidden");
+			}, 120);
+		};
+
+		prefixPatternInputEl.addEventListener("focus", showPresets);
+		prefixPatternInputEl.addEventListener("blur", hidePresets);
 
 		new Setting(containerEl)
 			.setName(t("enableMixedSortingName"))
@@ -537,4 +551,17 @@ function updatePrefixStyleSlot(
 			},
 		},
 	};
+}
+
+function appendPrefixPatternRule(currentValue: string, nextRule: string): string {
+	const normalizedCurrentRules = normalizePrefixPatternSource(currentValue)
+		.split("\n")
+		.map((rule) => rule.trim())
+		.filter((rule) => rule.length > 0);
+
+	if (normalizedCurrentRules.includes(nextRule)) {
+		return normalizedCurrentRules.join("\n");
+	}
+
+	return [...normalizedCurrentRules, nextRule].join("\n");
 }

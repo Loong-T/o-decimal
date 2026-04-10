@@ -2,7 +2,10 @@ import { Notice, Plugin } from "obsidian";
 import { FileExplorerEnhancer } from "./fileExplorerEnhancer";
 import { HiddenFilesManager } from "./hiddenFilesManager";
 import { createTranslator } from "./i18n";
-import { DEFAULT_NUMERIC_PREFIX_PATTERN } from "./prefix";
+import {
+	DEFAULT_NUMERIC_PREFIX_PATTERN,
+	normalizePrefixPatternSource,
+} from "./prefix";
 import { DEFAULT_SETTINGS, ODecimalSettingTab, type ODecimalSettings } from "./settings";
 import { normalizePrefixStyleSettings, type PrefixDisplayMode } from "./prefixStyle";
 import { StyleManager } from "./styleManager";
@@ -61,9 +64,14 @@ export default class ODecimalPlugin extends Plugin {
 	}
 
 	async applySettings(update: Partial<ODecimalSettings>): Promise<void> {
+		const normalizedPrefixPattern =
+			typeof update.prefixPattern === "string"
+				? normalizePrefixPatternSource(update.prefixPattern)
+				: this.settings.prefixPattern;
 		this.settings = {
 			...this.settings,
 			...update,
+			prefixPattern: normalizedPrefixPattern,
 			prefixStyles: update.prefixStyles ?? this.settings.prefixStyles,
 		};
 		await this.saveSettings();
@@ -80,7 +88,7 @@ export default class ODecimalPlugin extends Plugin {
 			prefixPattern:
 				typeof loadedData?.prefixPattern === "string" &&
 				loadedData.prefixPattern.trim().length > 0
-					? loadedData.prefixPattern
+					? normalizePrefixPatternSource(loadedData.prefixPattern)
 					: DEFAULT_NUMERIC_PREFIX_PATTERN,
 			prefixStyles: normalizePrefixStyleSettings(loadedData?.prefixStyles),
 		};
