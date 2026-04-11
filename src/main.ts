@@ -41,33 +41,7 @@ export default class ODecimalPlugin extends Plugin {
 		this.app.workspace.onLayoutReady(() => {
 			this.enhancer?.scheduleRefreshAll({ requestNativeSort: true });
 		});
-		this.registerEvent(
-			this.app.vault.on("create", () => {
-				if (this.hiddenFilesManager?.isSyncing()) {
-					return;
-				}
-				this.hiddenFilesManager?.scheduleSync();
-				this.enhancer?.scheduleRefreshAll({ requestNativeSort: true });
-			}),
-		);
-		this.registerEvent(
-			this.app.vault.on("delete", () => {
-				if (this.hiddenFilesManager?.isSyncing()) {
-					return;
-				}
-				this.hiddenFilesManager?.scheduleSync();
-				this.enhancer?.scheduleRefreshAll({ requestNativeSort: true });
-			}),
-		);
-		this.registerEvent(
-			this.app.vault.on("rename", () => {
-				if (this.hiddenFilesManager?.isSyncing()) {
-					return;
-				}
-				this.hiddenFilesManager?.scheduleSync();
-				this.enhancer?.scheduleRefreshAll({ requestNativeSort: true });
-			}),
-		);
+		this.registerVaultRefreshEvents();
 	}
 
 	onunload(): void {
@@ -131,6 +105,21 @@ export default class ODecimalPlugin extends Plugin {
 
 	private async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
+	}
+
+	private registerVaultRefreshEvents(): void {
+		this.registerEvent(this.app.vault.on("create", () => this.handleVaultMutation()));
+		this.registerEvent(this.app.vault.on("delete", () => this.handleVaultMutation()));
+		this.registerEvent(this.app.vault.on("rename", () => this.handleVaultMutation()));
+	}
+
+	private handleVaultMutation(): void {
+		if (this.hiddenFilesManager?.isSyncing()) {
+			return;
+		}
+
+		this.hiddenFilesManager?.scheduleSync();
+		this.enhancer?.scheduleRefreshAll({ requestNativeSort: true });
 	}
 
 	private registerCommands(): void {

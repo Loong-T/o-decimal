@@ -14,7 +14,6 @@ interface InternalVaultAdapter {
 
 export class HiddenFilesManager {
 	private readonly hiddenEntries = new Map<string, HiddenEntryType>();
-	private lastShowHiddenFiles: boolean | null = null;
 	private syncPromise: Promise<void> = Promise.resolve();
 	private syncingVisibility = false;
 
@@ -24,20 +23,26 @@ export class HiddenFilesManager {
 	) {}
 
 	start(): void {
-		this.lastShowHiddenFiles = this.getSettings().showHiddenFiles;
-		void this.syncVisibility();
+		void this.syncVisibility().catch((error: unknown) => {
+			reportHiddenFilesError(error);
+		});
 	}
 
 	stop(): void {
-		void this.hideAllHiddenEntries();
+		void this.hideAllHiddenEntries().catch((error: unknown) => {
+			reportHiddenFilesError(error);
+		});
 		this.hiddenEntries.clear();
-		this.lastShowHiddenFiles = null;
 	}
 
 	scheduleSync(): void {
-		this.syncPromise = this.syncPromise.then(async () => {
-			await this.syncVisibility();
-		});
+		this.syncPromise = this.syncPromise
+			.catch((error: unknown) => {
+				reportHiddenFilesError(error);
+			})
+			.then(async () => {
+				await this.syncVisibility();
+			});
 	}
 
 	whenSettled(): Promise<void> {
@@ -59,8 +64,6 @@ export class HiddenFilesManager {
 			} else {
 				await this.hideAllHiddenEntries();
 			}
-
-			this.lastShowHiddenFiles = shouldShowHiddenFiles;
 		} finally {
 			this.syncingVisibility = false;
 		}
@@ -226,4 +229,8 @@ function sortHiddenEntries(
 
 function getPathDepth(path: string): number {
 	return path === "" ? 0 : path.split("/").length;
+}
+
+function reportHiddenFilesError(error: unknown): void {
+	console.error("[O Decimal] Hidden files sync failed.", error);
 }

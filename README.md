@@ -2,251 +2,43 @@
 
 [English](#english) | [中文](#中文)
 
-## 中文
-
-### 简介
-
-`O Decimal` 是一个面向 Obsidian 文件树的轻量增强插件，主要解决“数字前缀命名法”在文件树里的两个问题：
-
-- 显示太吵，像 `01_项目`、`02_资料` 这样的前缀会影响阅读
-- 排序不直观，文件和文件夹会被默认类型分组打散
-
-这个插件只增强 **文件树显示** 和 **文件树排序**，不会修改真实文件名，也不会影响链接目标。
-
----
-
-### 当前功能
-
-#### 1. 前缀显示模式
-
-支持 3 种显示模式：
-
-- `显示原名`
-- `Badge`
-- `隐藏前缀`
-
-例如真实文件名为 `03_Project Alpha.md`：
-
-- 显示原名：`03_Project Alpha`
-- Badge：`[03] Project Alpha`
-- 隐藏前缀：`Project Alpha`
-
-进入文件树重命名时，会自动恢复真实文件名，避免把伪装后的显示文本当成文件名。
-
-#### 2. 数字前缀混合排序
-
-可以让同级文件和文件夹一起按前缀排序，而不是默认“文件夹优先、文件在后”。
-
-例如：
-
-1. `01_Inbox/`
-2. `02_Project.md`
-3. `03_Resources/`
-4. `10_Reading.md`
-
-#### 3. 自定义前缀正则
-
-可以自定义“什么样的前缀会被识别”。
-
-- 默认规则：
-  - `^(\d+)_`
-  - `^((?:\d+-\d+))_`
-- 支持在设置中按“每行一条规则”填写多个正则
-- 输入框聚焦时会出现常用示例补全
-- 规则会从上到下依次匹配
-- 如果正则里有第一组括号，括号匹配到的内容会显示在 Badge 中
-
-#### 4. 无前缀 / 隐藏项 Badge
-
-支持为特殊条目添加额外 Badge：
-
-- 无前缀条目：warning Badge
-- 隐藏项：hidden Badge
-
-并支持分别配置：
-
-- 是否显示
-- Badge 文本
-- 颜色、透明度、圆角等样式
-
-当隐藏项和无前缀条件同时满足时，优先显示隐藏项 Badge。
-
-#### 5. 显示隐藏文件
-
-可选在文件树中显示隐藏文件和隐藏文件夹（如 `.gitignore`、`.obsidian/`）。
-
-注意：
-
-- 这个功能使用的是较重的同步方式
-- 在大型仓库中切换时可能会有卡顿
-
-#### 6. 命令面板快速切换
-
-已提供命令面板命令，可快速切换：
-
-- 前缀显示模式
-- 无前缀警告 Badge
-
----
-
-### 安装方式
-
-#### 方式 1：本地开发 / 手动安装
-
-1. 将仓库 clone 到你的 vault 插件目录：
-
-```bash
-cd <你的 Vault>/.obsidian/plugins
-git clone https://github.com/Loong-T/o-decimal.git nerd-is-in-o-decimal
-cd nerd-is-in-o-decimal
-pnpm install
-pnpm build
-```
-
-2. 回到 Obsidian，打开：
-
-- `设置 -> 第三方插件`
-
-3. 刷新插件列表并启用 `O Decimal`
-
-#### 方式 2：使用 BRAT 按仓库地址加载
-
-如果你在使用 [obsidian42-brat](https://github.com/TfTHacker/obsidian42-brat)，可以直接通过仓库地址安装本插件。
-
-仓库地址：
-
-- [https://github.com/Loong-T/o-decimal](https://github.com/Loong-T/o-decimal)
-
-大致步骤：
-
-1. 安装并启用 `BRAT`
-2. 打开 BRAT 的设置页
-3. 选择 `Add Beta plugin`
-4. 输入仓库地址：`https://github.com/Loong-T/o-decimal`
-5. 安装并启用插件
-
----
-
-### 如何使用
-
-#### 基础使用
-
-安装后，打开：
-
-- `设置 -> O Decimal`
-
-你可以配置：
-
-- 前缀显示模式
-- 前缀识别正则
-- 是否启用数字混合排序
-- 是否显示无前缀警告 Badge
-- 是否显示隐藏文件
-- 各类 Badge 的样式
-
-#### 前缀正则示例
-
-插件内置了常见示例补全，也支持把多条规则写成多行，例如：
-
-```text
-^(\d+)_
-^((?:\d+-\d+))_
-```
-
-上面这组默认规则会同时覆盖：
-
-- `03_Project`
-- `00-09_Project`
-- `02-389_Project`
-
-其他常见示例包括：
-
-- `^(\d+)_`
-  - 例：`03_Project`
-- `^((?:\d+-\d+))_`
-  - 例：`00-09_Project`
-- `^\[(\d+)\]\s*`
-  - 例：`[23] Project`
-- `^(\d+)\.\s*`
-  - 例：`03. Project`
-- `^((?:\d+\.)+\d+)\s*`
-  - 例：`02.389 Project`
-
-#### 命令面板
-
-可在命令面板中搜索：
-
-- `前缀显示`
-- `无前缀警告 Badge`
-
-可快速切换常用显示状态。
-
----
-
-### 开发
-
-本项目使用：
-
-- TypeScript
-- esbuild
-- `pnpm`
-
-常用命令：
-
-```bash
-pnpm install
-pnpm dev
-pnpm build
-pnpm lint
-```
-
----
-
-### 说明
-
-- 本插件只作用于 **文件树**
-- 不会修改真实文件名
-- 不会修改链接、frontmatter 或文件内容
-- 重点是让数字前缀命名法在文件树里更好看、更好用
-
----
-
 ## English
 
-### Overview
+### What it does
 
-`O Decimal` is a lightweight Obsidian plugin that improves the file explorer for users who organize files with numeric prefixes.
+`O Decimal` is an Obsidian plugin for people who organize files with numeric prefixes such as `01_Project`, `02_Reading`, or `03_Archive`.
 
-It focuses on two problems:
+It improves the **file explorer only**:
 
-- prefixed names such as `01_Project` are visually noisy
-- default explorer sorting splits folders and files into separate groups
+- prefixes can be shown more cleanly
+- files and folders can be sorted together by prefix
+- badges can be added for special files such as `README.md` or hidden items
 
-This plugin only changes **file explorer display** and **file explorer sorting**. It does not rename files or change links.
+It does **not** rename files, change links, or modify note content.
 
 ---
 
-### Current features
+### Main features
 
 #### 1. Prefix display modes
 
-Three display modes are available:
+Choose how prefixes appear in the file explorer:
 
 - `Original`
 - `Badge`
 - `Hidden`
 
-For a real filename like `03_Project Alpha.md`:
+Example for `03_Project Alpha.md`:
 
 - Original: `03_Project Alpha`
 - Badge: `[03] Project Alpha`
 - Hidden: `Project Alpha`
 
-When renaming from the file explorer, the plugin restores the real filename automatically.
+When you rename a file from the explorer, the real filename is shown automatically.
 
-#### 2. Numeric mixed sorting
+#### 2. Mixed sorting by prefix
 
-Files and folders can be sorted together by prefix value, instead of Obsidian's default folder-first grouping.
+Files and folders can be sorted together by prefix instead of being split into separate groups.
 
 Example:
 
@@ -255,140 +47,146 @@ Example:
 3. `03_Resources/`
 4. `10_Reading.md`
 
-#### 3. Custom prefix regex
+#### 3. Custom prefix rules
 
 You can define your own prefix-matching rules.
 
-- Default rules:
-  - `^(\d+)_`
-  - `^((?:\d+-\d+))_`
-- Editable in settings with one regex per line
-- Built-in preset suggestions appear when the input is focused
-- Rules are tried from top to bottom
-- If the regex contains a first capture group, that captured text is shown inside the badge
+- one rule per line
+- checked from top to bottom
+- if a rule has a capture group, the first captured part is shown in the badge
+- if all rules are invalid, built-in defaults are used
 
-#### 4. Missing-prefix and hidden-item badges
-
-The plugin can show extra badges for:
-
-- items without a recognized prefix
-- hidden items
-
-Each badge type can be configured independently:
-
-- show / hide
-- badge text
-- color, opacity, radius, and other style settings
-
-If an item is both hidden and missing a prefix, the hidden badge takes priority.
-
-#### 5. Show hidden files
-
-The plugin can optionally reveal hidden files and folders in the file explorer, such as `.gitignore` or `.obsidian/`.
-
-Note:
-
-- this feature currently uses a heavier sync approach
-- toggling it may lag in large vaults
-
-#### 6. Command palette shortcuts
-
-Commands are available for quickly toggling:
-
-- prefix display mode
-- missing-prefix warning badge
-
----
-
-### Installation
-
-#### Option 1: Local development / manual install
-
-Clone the repository into your vault plugin folder:
-
-```bash
-cd <Your Vault>/.obsidian/plugins
-git clone https://github.com/Loong-T/o-decimal.git nerd-is-in-o-decimal
-cd nerd-is-in-o-decimal
-pnpm install
-pnpm build
-```
-
-Then open Obsidian:
-
-- `Settings -> Community plugins`
-
-Refresh plugins and enable `O Decimal`.
-
-#### Option 2: Install with BRAT
-
-If you use [obsidian42-brat](https://github.com/TfTHacker/obsidian42-brat), you can load this plugin directly from its repository.
-
-Repository:
-
-- [https://github.com/Loong-T/o-decimal](https://github.com/Loong-T/o-decimal)
-
-Typical steps:
-
-1. Install and enable `BRAT`
-2. Open BRAT settings
-3. Choose `Add Beta plugin`
-4. Paste `https://github.com/Loong-T/o-decimal`
-5. Install and enable the plugin
-
----
-
-### Usage
-
-Open:
-
-- `Settings -> O Decimal`
-
-You can configure:
-
-- prefix display mode
-- prefix regex
-- numeric mixed sorting
-- missing-prefix warning badge
-- hidden file visibility
-- badge appearance
-
-#### Prefix regex examples
-
-Built-in preset examples include multi-line rules like:
+Default rules:
 
 ```text
 ^(\d+)_
 ^((?:\d+-\d+))_
 ```
 
-Those default rules cover:
+These cover names such as:
 
 - `03_Project`
 - `00-09_Project`
 - `02-389_Project`
 
-Other common examples include:
+#### 4. Conditional badges
 
-- `^(\d+)_`
-  - Example: `03_Project`
-- `^((?:\d+-\d+))_`
-  - Example: `00-09_Project`
-- `^\[(\d+)\]\s*`
-  - Example: `[23] Project`
-- `^(\d+)\.\s*`
-  - Example: `03. Project`
-- `^((?:\d+\.)+\d+)\s*`
-  - Example: `02.389 Project`
+You can show a badge when a file or folder matches a rule.
 
-#### Command palette
+Examples:
 
-Search for:
+- `README.md`
+- `AGENTS.md`
+- `CLAUDE.md`
+- `TODO.md`
+- `PLAN.md`
 
-- `Prefix display`
-- `Warning badge`
+Each rule can define:
 
-to quickly switch common states.
+- a display name
+- what it matches
+- an icon or custom SVG
+- optional badge text
+- optional tooltip
+- optional custom colors
+
+Rules are checked from top to bottom, and only one badge is shown per item.
+
+Badge priority:
+
+1. Prefix badge
+2. First matching conditional badge
+3. Hidden-item badge
+4. Missing-prefix badge
+
+#### 5. Hidden files
+
+You can optionally show hidden files and folders such as `.obsidian` or `.gitignore` in the file explorer.
+
+In large vaults, switching this may take a moment.
+
+#### 6. Badge styling
+
+You can customize badge appearance, including:
+
+- radius
+- background color
+- text color
+- opacity
+
+Different badge types can be styled separately.
+
+#### 7. Command palette shortcuts
+
+Commands are included for quickly switching:
+
+- prefix display mode
+- missing-prefix badge
+
+---
+
+### Installation
+
+#### Option 1: Manual install / local development
+
+```bash
+cd <Your Vault>/.obsidian/plugins
+git clone https://github.com/Loong-T/o-decimal.git nerd-is-in-o-decimal
+cd nerd-is-in-o-decimal
+npm install
+npm run build
+```
+
+Then open **Settings → Community plugins**, refresh the plugin list, and enable `O Decimal`.
+
+#### Option 2: Install with BRAT
+
+If you use [obsidian42-brat](https://github.com/TfTHacker/obsidian42-brat), add this repository:
+
+[https://github.com/Loong-T/o-decimal](https://github.com/Loong-T/o-decimal)
+
+Typical steps:
+
+1. Install and enable `BRAT`
+2. Open BRAT settings
+3. Select `Add Beta plugin`
+4. Paste the repository URL
+5. Install and enable the plugin
+
+---
+
+### How to use it
+
+Open:
+
+- **Settings → O Decimal**
+
+You can configure:
+
+- prefix display
+- prefix rules
+- mixed sorting
+- conditional badges
+- hidden file visibility
+- badge styles
+
+#### More prefix rule examples
+
+```text
+^(\d+)_
+^((?:\d+-\d+))_
+^\[(\d+)\]\s*
+^(\d+)\.\s*
+^((?:\d+\.)+\d+)\s*
+```
+
+Examples:
+
+- `03_Project`
+- `00-09_Project`
+- `[23] Project`
+- `03. Project`
+- `02.389 Project`
 
 ---
 
@@ -398,22 +196,241 @@ This project uses:
 
 - TypeScript
 - esbuild
-- `pnpm`
+- npm
 
 Common commands:
 
 ```bash
-pnpm install
-pnpm dev
-pnpm build
-pnpm lint
+npm install
+npm run dev
+npm run build
+npm run lint
 ```
 
 ---
 
 ### Notes
 
-- This plugin only targets the **file explorer**
-- It does not rename real files
-- It does not change links, frontmatter, or file contents
-- Its goal is to make numeric-prefix naming cleaner and more practical in Obsidian
+- This plugin only affects the file explorer
+- It does not rename files
+- It does not change links, frontmatter, or note content
+
+## 中文
+
+### 作用
+
+`O Decimal` 是一个面向 Obsidian 文件树的插件，适合使用数字前缀命名的人，比如：
+
+- `01_Project`
+- `02_Reading`
+- `03_Archive`
+
+它只增强 **文件树**：
+
+- 让前缀显示更清爽
+- 让文件和文件夹按前缀一起排序
+- 为特殊文件或隐藏项显示 Badge
+
+它 **不会** 修改真实文件名、链接或笔记内容。
+
+---
+
+### 主要功能
+
+#### 1. 前缀显示模式
+
+可以选择前缀在文件树里的显示方式：
+
+- `显示原名`
+- `Badge`
+- `隐藏前缀`
+
+例如文件名是 `03_Project Alpha.md`：
+
+- 显示原名：`03_Project Alpha`
+- Badge：`[03] Project Alpha`
+- 隐藏前缀：`Project Alpha`
+
+从文件树里重命名时，会自动显示真实文件名。
+
+#### 2. 按前缀混合排序
+
+可以让同级文件和文件夹一起按前缀排序，而不是被默认分组拆开。
+
+例如：
+
+1. `01_Inbox/`
+2. `02_Project.md`
+3. `03_Resources/`
+4. `10_Reading.md`
+
+#### 3. 自定义前缀规则
+
+你可以自己定义“什么样的前缀会被识别”。
+
+- 每行一条规则
+- 从上到下依次检查
+- 如果规则里有捕获组，会把第一组匹配到的内容显示在 Badge 里
+- 如果所有规则都无效，会改用内置默认规则
+
+默认规则：
+
+```text
+^(\d+)_
+^((?:\d+-\d+))_
+```
+
+它们可以覆盖：
+
+- `03_Project`
+- `00-09_Project`
+- `02-389_Project`
+
+#### 4. 条件 Badge
+
+当文件或文件夹匹配规则时，可以显示 Badge。
+
+例如：
+
+- `README.md`
+- `AGENTS.md`
+- `CLAUDE.md`
+- `TODO.md`
+- `PLAN.md`
+
+每条规则可以设置：
+
+- 规则名称
+- 匹配条件
+- 图标或自定义 SVG
+- 可选文字
+- 可选提示
+- 可选颜色
+
+规则会从上到下检查，同一个条目只显示一个 Badge。
+
+优先级：
+
+1. 前缀 Badge
+2. 第一条命中的条件 Badge
+3. 隐藏项 Badge
+4. 无前缀 Badge
+
+#### 5. 显示隐藏文件
+
+可以选择在文件树中显示隐藏文件和隐藏文件夹，例如：
+
+- `.obsidian`
+- `.gitignore`
+
+在大型 vault 中切换时，可能需要一点时间。
+
+#### 6. Badge 样式
+
+可以分别调整 Badge 的外观，例如：
+
+- 圆角
+- 背景颜色
+- 文字颜色
+- 透明度
+
+不同类型的 Badge 可以分别设置。
+
+#### 7. 命令面板快捷切换
+
+插件提供了命令，方便快速切换：
+
+- 前缀显示模式
+- 无前缀 Badge
+
+---
+
+### 安装
+
+#### 方式 1：手动安装 / 本地开发
+
+```bash
+cd <你的 Vault>/.obsidian/plugins
+git clone https://github.com/Loong-T/o-decimal.git nerd-is-in-o-decimal
+cd nerd-is-in-o-decimal
+npm install
+npm run build
+```
+
+然后打开 **设置 → 第三方插件**，刷新插件列表并启用 `O Decimal`。
+
+#### 方式 2：使用 BRAT
+
+如果你使用 [obsidian42-brat](https://github.com/TfTHacker/obsidian42-brat)，可以直接添加这个仓库：
+
+[https://github.com/Loong-T/o-decimal](https://github.com/Loong-T/o-decimal)
+
+大致步骤：
+
+1. 安装并启用 `BRAT`
+2. 打开 BRAT 设置
+3. 选择 `Add Beta plugin`
+4. 粘贴仓库地址
+5. 安装并启用插件
+
+---
+
+### 使用方法
+
+打开：
+
+- **设置 → O Decimal**
+
+你可以配置：
+
+- 前缀显示
+- 前缀规则
+- 混合排序
+- 条件 Badge
+- 是否显示隐藏文件
+- Badge 样式
+
+#### 更多前缀规则示例
+
+```text
+^(\d+)_
+^((?:\d+-\d+))_
+^\[(\d+)\]\s*
+^(\d+)\.\s*
+^((?:\d+\.)+\d+)\s*
+```
+
+示例：
+
+- `03_Project`
+- `00-09_Project`
+- `[23] Project`
+- `03. Project`
+- `02.389 Project`
+
+---
+
+### 开发
+
+本项目使用：
+
+- TypeScript
+- esbuild
+- npm
+
+常用命令：
+
+```bash
+npm install
+npm run dev
+npm run build
+npm run lint
+```
+
+---
+
+### 说明
+
+- 本插件只影响文件树
+- 不会修改真实文件名
+- 不会修改链接、frontmatter 或笔记内容
