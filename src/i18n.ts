@@ -52,16 +52,71 @@ type TranslationKey =
 	| "hiddenItemBadgeTextDesc"
 	| "showHiddenFilesName"
 	| "showHiddenFilesDesc"
+	| "showHiddenFilesLoading"
 	| "typePriorityName"
 	| "typePriorityDesc"
 	| "typePriorityMixed"
 	| "typePriorityFoldersFirst"
 	| "typePriorityFilesFirst"
+	| "conditionalBadgesHeading"
+	| "conditionalBadgesDesc"
+	| "conditionalBadgeRuleSummary"
+	| "conditionalBadgeRuleSummaryEmpty"
+	| "conditionalBadgeNameName"
+	| "conditionalBadgeNameDesc"
+	| "conditionalBadgeEnabledName"
+	| "conditionalBadgeEnabledDesc"
+	| "conditionalBadgeTargetName"
+	| "conditionalBadgeTargetDesc"
+	| "conditionalBadgeTargetBoth"
+	| "conditionalBadgeTargetFile"
+	| "conditionalBadgeTargetFolder"
+	| "conditionalBadgeMatchModeName"
+	| "conditionalBadgeMatchModeDesc"
+	| "conditionalBadgeMatchModeFullNameExact"
+	| "conditionalBadgeMatchModeDisplayNameExact"
+	| "conditionalBadgeMatchModeExtensionExact"
+	| "conditionalBadgeMatchModeFullNameRegex"
+	| "conditionalBadgeMatchModePathRegex"
+	| "conditionalBadgePatternName"
+	| "conditionalBadgePatternDesc"
+	| "conditionalBadgeIconName"
+	| "conditionalBadgeIconDesc"
+	| "conditionalBadgeIconDescEmpty"
+	| "conditionalBadgeIconDescSelected"
+	| "conditionalBadgePickIcon"
+	| "conditionalBadgePreviewIcon"
+	| "conditionalBadgeClearIcon"
+	| "conditionalBadgeCustomSvgName"
+	| "conditionalBadgeCustomSvgDesc"
+	| "conditionalBadgeCustomSvgDescSelected"
+	| "conditionalBadgeChooseSvgFile"
+	| "conditionalBadgeClearSvgFile"
+	| "conditionalBadgeBackgroundColorName"
+	| "conditionalBadgeBackgroundColorDesc"
+	| "conditionalBadgeTextColorName"
+	| "conditionalBadgeTextColorDesc"
+	| "conditionalBadgeTextName"
+	| "conditionalBadgeTextDesc"
+	| "conditionalBadgeTooltipName"
+	| "conditionalBadgeTooltipDesc"
+	| "conditionalBadgeDragHandle"
+	| "conditionalBadgeDeleteRule"
+	| "conditionalBadgeAddRuleName"
+	| "conditionalBadgeAddRuleDesc"
+	| "conditionalBadgeAddRuleButton"
+	| "iconPickerTitle"
+	| "iconPickerSearchName"
+	| "iconPickerSearchPlaceholder"
+	| "iconPickerCommonHeading"
+	| "iconPickerNoResults"
+	| "iconPickerSelectedLabel"
 	| "badgeStylesHeading"
 	| "badgeRadiusName"
 	| "badgeRadiusDesc"
 	| "fileBadgeHeading"
 	| "folderBadgeHeading"
+	| "conditionBadgeHeading"
 	| "warningBadgeHeading"
 	| "hiddenBadgeHeading"
 	| "badgeBackgroundColorName"
@@ -141,18 +196,85 @@ const TRANSLATIONS: Record<
 			"Customize the text shown inside the hidden-item badge.",
 		showHiddenFilesName: "Show hidden files",
 		showHiddenFilesDesc:
-			"Reveal hidden files and folders in the file explorer. Toggling this may lag in large vaults. Hidden-item badges can be styled separately below.",
+			"Reveal hidden files and folders in the file explorer. This may lag in large vaults, so please wait for it to finish.",
+		showHiddenFilesLoading: "Updating hidden files…",
 		typePriorityName: "Type priority",
 		typePriorityDesc:
 			"Available only when numeric mixed sorting is enabled.",
 		typePriorityMixed: "Mixed",
 		typePriorityFoldersFirst: "Folders first",
 		typePriorityFilesFirst: "Files first",
+		conditionalBadgesHeading: "Conditional badges",
+		conditionalBadgesDesc:
+			"Only one badge is shown per item. Priority is: prefix badge, first matching conditional rule, hidden-item badge, then missing-prefix badge.",
+		conditionalBadgeRuleSummary: "Rule {{index}}: {{name}}",
+		conditionalBadgeRuleSummaryEmpty: "Rule {{index}}",
+		conditionalBadgeNameName: "Rule name",
+		conditionalBadgeNameDesc:
+			"Used only for display in settings. It does not affect matching.",
+		conditionalBadgeEnabledName: "Enable this rule",
+		conditionalBadgeEnabledDesc:
+			"Disabled rules stay in the list but do not affect the file explorer.",
+		conditionalBadgeTargetName: "Target",
+		conditionalBadgeTargetDesc:
+			"Limit the rule to files, folders, or both kinds of explorer items.",
+		conditionalBadgeTargetBoth: "Files and folders",
+		conditionalBadgeTargetFile: "Files only",
+		conditionalBadgeTargetFolder: "Folders only",
+		conditionalBadgeMatchModeName: "Match mode",
+		conditionalBadgeMatchModeDesc:
+			"Choose which part of the item should be matched against the pattern.",
+		conditionalBadgeMatchModeFullNameExact: "Exact full name",
+		conditionalBadgeMatchModeDisplayNameExact: "Exact display name",
+		conditionalBadgeMatchModeExtensionExact: "Exact file extension",
+		conditionalBadgeMatchModeFullNameRegex: "Regex on full name",
+		conditionalBadgeMatchModePathRegex: "Regex on path",
+		conditionalBadgePatternName: "Pattern",
+		conditionalBadgePatternDesc:
+			"Examples: README.md, AGENTS.md, md, ^README(?:\\.md)?$",
+		conditionalBadgeIconName: "Icon",
+		conditionalBadgeIconDesc: "Choose an icon for this badge.",
+		conditionalBadgeIconDescEmpty: "No icon selected. The badge can still show text only.",
+		conditionalBadgeIconDescSelected: "Selected icon: {{icon}}",
+		conditionalBadgePickIcon: "Choose icon",
+		conditionalBadgePreviewIcon: "Current icon preview",
+		conditionalBadgeClearIcon: "Clear icon",
+		conditionalBadgeCustomSvgName: "Custom SVG",
+		conditionalBadgeCustomSvgDesc:
+			"Optional SVG file. When provided, it overrides the icon above for this rule and is tinted to follow the badge text color.",
+		conditionalBadgeCustomSvgDescSelected: "Selected SVG file: {{file}}",
+		conditionalBadgeChooseSvgFile: "Choose SVG file",
+		conditionalBadgeClearSvgFile: "Clear SVG file",
+		conditionalBadgeBackgroundColorName: "Badge background color",
+		conditionalBadgeBackgroundColorDesc:
+			"Optional per-rule background color override for this conditional badge.",
+		conditionalBadgeTextColorName: "Badge text color",
+		conditionalBadgeTextColorDesc:
+			"Optional per-rule text and icon color override for this conditional badge.",
+		conditionalBadgeTextName: "Badge text",
+		conditionalBadgeTextDesc:
+			"Optional short label shown next to the icon. Leave empty to show icon only.",
+		conditionalBadgeTooltipName: "Tooltip",
+		conditionalBadgeTooltipDesc:
+			"Optional tooltip shown when hovering the badge.",
+		conditionalBadgeDragHandle: "Drag to reorder",
+		conditionalBadgeDeleteRule: "Delete rule",
+		conditionalBadgeAddRuleName: "Add conditional rule",
+		conditionalBadgeAddRuleDesc:
+			"Rules are checked from top to bottom after prefix badges and before hidden or missing-prefix fallbacks.",
+		conditionalBadgeAddRuleButton: "Add rule",
+		iconPickerTitle: "Choose an icon",
+		iconPickerSearchName: "Search",
+		iconPickerSearchPlaceholder: "Search icons",
+		iconPickerCommonHeading: "Recommended",
+		iconPickerNoResults: "No icons found.",
+		iconPickerSelectedLabel: "Selected",
 		badgeStylesHeading: "Badge styles",
 		badgeRadiusName: "Badge radius",
 		badgeRadiusDesc: "Controls the roundness of every generated badge.",
 		fileBadgeHeading: "File badge",
 		folderBadgeHeading: "Folder badge",
+		conditionBadgeHeading: "Conditional badge",
 		warningBadgeHeading: "Missing-prefix badge",
 		hiddenBadgeHeading: "Hidden-item badge",
 		badgeBackgroundColorName: "Background color",
@@ -231,17 +353,79 @@ const TRANSLATIONS: Record<
 		hiddenItemBadgeTextDesc: "自定义隐藏项 Badge 里的文本。",
 		showHiddenFilesName: "显示隐藏文件",
 		showHiddenFilesDesc:
-			"在文件树中显示隐藏文件和隐藏文件夹。大型仓库中切换此选项时可能会有卡顿。它们的 Badge 样式可在下方单独调整。",
+			"在文件树中显示隐藏文件和隐藏文件夹。大型仓库中切换此选项时可能会有卡顿，请耐心等待。",
+		showHiddenFilesLoading: "正在更新隐藏文件…",
 		typePriorityName: "类型优先级",
 		typePriorityDesc: "仅在启用数字混合排序后可用。",
 		typePriorityMixed: "混排",
 		typePriorityFoldersFirst: "文件夹优先",
 		typePriorityFilesFirst: "文件优先",
+		conditionalBadgesHeading: "条件 Badge",
+		conditionalBadgesDesc:
+			"同一条目只显示一个 Badge。优先级依次为：前缀 Badge、第一条命中的条件规则、隐藏项 Badge、无前缀 Badge。",
+		conditionalBadgeRuleSummary: "规则 {{index}}：{{name}}",
+		conditionalBadgeRuleSummaryEmpty: "规则 {{index}}",
+		conditionalBadgeNameName: "规则名称",
+		conditionalBadgeNameDesc: "仅用于设置界面显示，不会影响匹配逻辑。",
+		conditionalBadgeEnabledName: "启用此规则",
+		conditionalBadgeEnabledDesc: "关闭后规则会保留，但不会影响文件树显示。",
+		conditionalBadgeTargetName: "作用对象",
+		conditionalBadgeTargetDesc: "限制规则只匹配文件、文件夹，或两者都匹配。",
+		conditionalBadgeTargetBoth: "文件和文件夹",
+		conditionalBadgeTargetFile: "仅文件",
+		conditionalBadgeTargetFolder: "仅文件夹",
+		conditionalBadgeMatchModeName: "匹配方式",
+		conditionalBadgeMatchModeDesc: "选择要和规则模式进行匹配的字段。",
+		conditionalBadgeMatchModeFullNameExact: "完整名称精确匹配",
+		conditionalBadgeMatchModeDisplayNameExact: "显示名称精确匹配",
+		conditionalBadgeMatchModeExtensionExact: "文件扩展名精确匹配",
+		conditionalBadgeMatchModeFullNameRegex: "完整名称正则匹配",
+		conditionalBadgeMatchModePathRegex: "路径正则匹配",
+		conditionalBadgePatternName: "匹配模式",
+		conditionalBadgePatternDesc:
+			"例如：README.md、AGENTS.md、md、^README(?:\\.md)?$",
+		conditionalBadgeIconName: "图标",
+		conditionalBadgeIconDesc: "为这个 Badge 选择图标。",
+		conditionalBadgeIconDescEmpty: "当前未选择图标，也可以只显示文本。",
+		conditionalBadgeIconDescSelected: "当前图标：{{icon}}",
+		conditionalBadgePickIcon: "选择图标",
+		conditionalBadgePreviewIcon: "当前图标预览",
+		conditionalBadgeClearIcon: "清除图标",
+		conditionalBadgeCustomSvgName: "自定义 SVG",
+		conditionalBadgeCustomSvgDesc:
+			"可选的 SVG 文件。设置后会覆盖上方图标，作为当前规则的专属图标，并会跟随 Badge 文字颜色着色。",
+		conditionalBadgeCustomSvgDescSelected: "当前 SVG 文件：{{file}}",
+		conditionalBadgeChooseSvgFile: "选择 SVG 文件",
+		conditionalBadgeClearSvgFile: "清除 SVG 文件",
+		conditionalBadgeBackgroundColorName: "Badge 背景颜色",
+		conditionalBadgeBackgroundColorDesc:
+			"可选的单条规则背景色覆盖，只影响当前条件 Badge。",
+		conditionalBadgeTextColorName: "Badge 文字颜色",
+		conditionalBadgeTextColorDesc:
+			"可选的单条规则文字和图标颜色覆盖，只影响当前条件 Badge。",
+		conditionalBadgeTextName: "Badge 文本",
+		conditionalBadgeTextDesc:
+			"可选的短文本，会显示在图标旁边。留空则仅显示图标。",
+		conditionalBadgeTooltipName: "提示文本",
+		conditionalBadgeTooltipDesc: "鼠标悬停在 Badge 上时显示的可选提示。",
+		conditionalBadgeDragHandle: "拖动排序",
+		conditionalBadgeDeleteRule: "删除规则",
+		conditionalBadgeAddRuleName: "添加条件规则",
+		conditionalBadgeAddRuleDesc:
+			"规则会按从上到下顺序检查，位置在前缀 Badge 之后、隐藏项和无前缀兜底之前。",
+		conditionalBadgeAddRuleButton: "添加规则",
+		iconPickerTitle: "选择图标",
+		iconPickerSearchName: "搜索",
+		iconPickerSearchPlaceholder: "搜索图标",
+		iconPickerCommonHeading: "常用图标",
+		iconPickerNoResults: "没有找到图标。",
+		iconPickerSelectedLabel: "已选",
 		badgeStylesHeading: "Badge 样式",
 		badgeRadiusName: "Badge 圆角",
 		badgeRadiusDesc: "控制所有自动生成的 Badge 的圆角大小。",
 		fileBadgeHeading: "文件 Badge",
 		folderBadgeHeading: "文件夹 Badge",
+		conditionBadgeHeading: "条件 Badge",
 		warningBadgeHeading: "无前缀 Badge",
 		hiddenBadgeHeading: "隐藏项 Badge",
 		badgeBackgroundColorName: "背景颜色",

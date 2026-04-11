@@ -1,6 +1,11 @@
 export type PrefixDisplayMode = "original" | "badge" | "hidden";
 export type TreeItemTypePriority = "mixed" | "folders-first" | "files-first";
-export type PrefixStyleSlotId = "fileBadge" | "folderBadge" | "warningBadge" | "hiddenBadge";
+export type PrefixStyleSlotId =
+	| "fileBadge"
+	| "folderBadge"
+	| "conditionBadge"
+	| "warningBadge"
+	| "hiddenBadge";
 
 export interface PrefixStyleSlotSettings {
 	backgroundColor: string;
@@ -44,6 +49,15 @@ export const PREFIX_STYLE_SLOT_DEFINITIONS: PrefixStyleSlotDefinition[] = [
 		textColorPickerFallback: "#ffffff",
 	},
 	{
+		id: "conditionBadge",
+		className: "o-decimal-prefix-badge-conditional",
+		defaultBackgroundColor: "#2f343c",
+		defaultTextColor: "#ffffff",
+		defaultBackgroundOpacity: 88,
+		colorPickerFallback: "#2f343c",
+		textColorPickerFallback: "#ffffff",
+	},
+	{
 		id: "warningBadge",
 		className: "o-decimal-prefix-badge-warning",
 		defaultBackgroundColor: "#d9a300",
@@ -76,6 +90,11 @@ export const DEFAULT_PREFIX_STYLE_SETTINGS: PrefixStyleSettings = {
 				textColor: "",
 				backgroundOpacity: 78,
 			},
+			conditionBadge: {
+				backgroundColor: "",
+				textColor: "",
+				backgroundOpacity: 88,
+			},
 			warningBadge: {
 				backgroundColor: "",
 				textColor: "",
@@ -101,6 +120,10 @@ export function normalizePrefixStyleSettings(
 		slots: {
 			fileBadge: normalizeSlotSettings("fileBadge", value?.slots?.fileBadge),
 			folderBadge: normalizeSlotSettings("folderBadge", value?.slots?.folderBadge),
+			conditionBadge: normalizeSlotSettings(
+				"conditionBadge",
+				value?.slots?.conditionBadge,
+			),
 			warningBadge: normalizeSlotSettings("warningBadge", value?.slots?.warningBadge),
 			hiddenBadge: normalizeSlotSettings("hiddenBadge", value?.slots?.hiddenBadge),
 		},

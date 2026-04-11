@@ -133,6 +133,7 @@ export class FileExplorerEnhancer {
 				applyPrefixDisplay(this, getExplorerDisplayName(this.file), {
 					prefixDisplayMode: getSettings().prefixDisplayMode,
 					prefixPattern: getSettings().prefixPattern,
+					conditionalBadgeRules: getSettings().conditionalBadgeRules,
 					showMissingPrefixBadge: getSettings().showMissingPrefixBadge,
 					showHiddenItemBadge: getSettings().showHiddenItemBadge && getSettings().showHiddenFiles,
 					hiddenItemBadgeText: getSettings().hiddenItemBadgeText,

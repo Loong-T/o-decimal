@@ -1,4 +1,4 @@
-import { App } from "obsidian";
+import { App, TFolder } from "obsidian";
 import type { ODecimalSettings } from "./settings";
 
 type HiddenEntryType = "file" | "folder";
@@ -7,15 +7,16 @@ interface InternalVaultAdapter {
 	exists(path: string, sensitive?: boolean): Promise<boolean>;
 	list(path: string): Promise<{ files: string[]; folders: string[] }>;
 	getRealPath?(path: string): string;
-	reconcileDeletion?(realPath: string, path: string): void;
-	reconcileFileInternal?(realPath: string, path: string): void;
-	reconcileFolderCreation?(realPath: string, path: string): void;
+	reconcileDeletion?(realPath: string, path: string): void | Promise<void>;
+	reconcileFileInternal?(realPath: string, path: string): void | Promise<void>;
+	reconcileFolderCreation?(realPath: string, path: string): void | Promise<void>;
 }
 
 export class HiddenFilesManager {
 	private readonly hiddenEntries = new Map<string, HiddenEntryType>();
 	private lastShowHiddenFiles: boolean | null = null;
 	private syncPromise: Promise<void> = Promise.resolve();
+	private syncingVisibility = false;
 
 	constructor(
 		private readonly app: App,
@@ -43,17 +44,26 @@ export class HiddenFilesManager {
 		return this.syncPromise;
 	}
 
+	isSyncing(): boolean {
+		return this.syncingVisibility;
+	}
+
 	private async syncVisibility(): Promise<void> {
-		const shouldShowHiddenFiles = this.getSettings().showHiddenFiles;
-		await this.collectHiddenEntries();
+		this.syncingVisibility = true;
+		try {
+			const shouldShowHiddenFiles = this.getSettings().showHiddenFiles;
+			await this.collectHiddenEntries();
 
-		if (shouldShowHiddenFiles) {
-			await this.showAllHiddenEntries();
-		} else if (this.lastShowHiddenFiles) {
-			await this.hideAllHiddenEntries();
+			if (shouldShowHiddenFiles) {
+				await this.showAllHiddenEntries();
+			} else {
+				await this.hideAllHiddenEntries();
+			}
+
+			this.lastShowHiddenFiles = shouldShowHiddenFiles;
+		} finally {
+			this.syncingVisibility = false;
 		}
-
-		this.lastShowHiddenFiles = shouldShowHiddenFiles;
 	}
 
 	private async collectHiddenEntries(): Promise<void> {
@@ -71,28 +81,72 @@ export class HiddenFilesManager {
 	private async showAllHiddenEntries(): Promise<void> {
 		const adapter = this.app.vault.adapter as InternalVaultAdapter;
 		for (const [path, type] of sortHiddenEntries(this.hiddenEntries, "show")) {
-			if (this.app.vault.getAbstractFileByPath(path)) {
-				continue;
-			}
-
-			const realPath = adapter.getRealPath?.(path);
-			if (!realPath) {
+			const existingEntry = this.app.vault.getAbstractFileByPath(path);
+			if (existingEntry && type !== "folder") {
 				continue;
 			}
 
 			if (type === "folder") {
-				adapter.reconcileFolderCreation?.(realPath, path);
-			} else {
-				adapter.reconcileFileInternal?.(realPath, path);
+				if (existingEntry) {
+					await this.showFolderChildren(adapter, path);
+					continue;
+				}
+
+				const realPath = adapter.getRealPath?.(path);
+				if (!realPath) {
+					continue;
+				}
+
+				await adapter.reconcileFolderCreation?.(realPath, path);
+				await this.showFolderChildren(adapter, path);
+				continue;
 			}
+
+			await adapter.reconcileFileInternal?.(path, path);
+		}
+	}
+
+	private async showFolderChildren(
+		adapter: InternalVaultAdapter,
+		folderPath: string,
+	): Promise<void> {
+		const { folders, files } = await adapter.list(folderPath);
+
+		for (const childFolderPath of folders) {
+			if (this.app.vault.getAbstractFileByPath(childFolderPath)) {
+				if (isHiddenPath(childFolderPath)) {
+					await this.showFolderChildren(adapter, childFolderPath);
+				}
+				continue;
+			}
+
+			const realPath = adapter.getRealPath?.(childFolderPath);
+			if (!realPath) {
+				continue;
+			}
+
+			await adapter.reconcileFolderCreation?.(realPath, childFolderPath);
+		}
+
+		for (const filePath of files) {
+			if (this.app.vault.getAbstractFileByPath(filePath)) {
+				continue;
+			}
+
+			await adapter.reconcileFileInternal?.(filePath, filePath);
 		}
 	}
 
 	private async hideAllHiddenEntries(): Promise<void> {
 		const adapter = this.app.vault.adapter as InternalVaultAdapter;
-		for (const [path] of sortHiddenEntries(this.hiddenEntries, "hide")) {
-			if (!this.app.vault.getAbstractFileByPath(path)) {
+		for (const [path, type] of sortHiddenEntries(this.hiddenEntries, "hide")) {
+			const existingEntry = this.app.vault.getAbstractFileByPath(path);
+			if (!existingEntry) {
 				continue;
+			}
+
+			if (type === "folder" && existingEntry instanceof TFolder) {
+				await this.hideFolderChildren(adapter, existingEntry);
 			}
 
 			const realPath = adapter.getRealPath?.(path);
@@ -100,7 +154,25 @@ export class HiddenFilesManager {
 				continue;
 			}
 
-			adapter.reconcileDeletion?.(realPath, path);
+			await adapter.reconcileDeletion?.(realPath, path);
+		}
+	}
+
+	private async hideFolderChildren(
+		adapter: InternalVaultAdapter,
+		folder: TFolder,
+	): Promise<void> {
+		for (const child of [...folder.children]) {
+			if (child instanceof TFolder) {
+				await this.hideFolderChildren(adapter, child);
+			}
+
+			const realPath = adapter.getRealPath?.(child.path);
+			if (!realPath) {
+				continue;
+			}
+
+			await adapter.reconcileDeletion?.(realPath, child.path);
 		}
 	}
 }
