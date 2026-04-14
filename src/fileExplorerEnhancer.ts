@@ -1,5 +1,6 @@
 import { App } from "obsidian";
 import {
+	getExplorerRawName,
 	getExplorerFileItems,
 	getFileExplorerViews,
 	getExplorerDisplayName,
@@ -130,17 +131,26 @@ export class FileExplorerEnhancer {
 			return function (this: InternalFileTreeItem, ...args: unknown[]) {
 				const result = original.apply(this, args);
 				const t = createI18nTranslator(getSettings().language);
-				applyPrefixDisplay(this, getExplorerDisplayName(this.file), {
+				applyPrefixDisplay(this, {
+					rawName: getExplorerRawName(this.file),
+					displayName: getExplorerDisplayName(this.file),
 					prefixDisplayMode: getSettings().prefixDisplayMode,
 					prefixPattern: getSettings().prefixPattern,
 					conditionalBadgeRules: getSettings().conditionalBadgeRules,
+					statusSuffixRules: getSettings().statusSuffixRules,
+					hideMatchedStatusSuffix: getSettings().hideMatchedStatusSuffix,
+					showStatusSuffixTrailingBadge:
+						getSettings().showStatusSuffixTrailingBadge,
 					showMissingPrefixBadge: getSettings().showMissingPrefixBadge,
-					showHiddenItemBadge: getSettings().showHiddenItemBadge && getSettings().showHiddenFiles,
+					showHiddenItemBadge:
+						getSettings().showHiddenItemBadge &&
+						getSettings().showHiddenFiles,
 					hiddenItemBadgeText: getSettings().hiddenItemBadgeText,
 					missingPrefixBadgeText: getSettings().missingPrefixBadgeText,
 					tooltipHiddenItem: t("tooltipHiddenItem"),
 					tooltipMissingPrefix: t("tooltipMissingPrefix"),
 					tooltipPrefixBadgeLabel: t("tooltipPrefixBadgeLabel"),
+					tooltipStatusSuffixLabel: t("tooltipStatusSuffixLabel"),
 				});
 				return result;
 			};

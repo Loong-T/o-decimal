@@ -4,6 +4,8 @@ export type PrefixStyleSlotId =
 	| "fileBadge"
 	| "folderBadge"
 	| "conditionBadge"
+	| "statusBadge"
+	| "statusTrailingBadge"
 	| "warningBadge"
 	| "hiddenBadge";
 
@@ -58,6 +60,24 @@ export const PREFIX_STYLE_SLOT_DEFINITIONS: PrefixStyleSlotDefinition[] = [
 		textColorPickerFallback: "#ffffff",
 	},
 	{
+		id: "statusBadge",
+		className: "o-decimal-prefix-badge-status",
+		defaultBackgroundColor: "#1f9d55",
+		defaultTextColor: "#ffffff",
+		defaultBackgroundOpacity: 82,
+		colorPickerFallback: "#1f9d55",
+		textColorPickerFallback: "#ffffff",
+	},
+	{
+		id: "statusTrailingBadge",
+		className: "o-decimal-prefix-badge-status-trailing",
+		defaultBackgroundColor: "#1f9d55",
+		defaultTextColor: "#ffffff",
+		defaultBackgroundOpacity: 82,
+		colorPickerFallback: "#1f9d55",
+		textColorPickerFallback: "#ffffff",
+	},
+	{
 		id: "warningBadge",
 		className: "o-decimal-prefix-badge-warning",
 		defaultBackgroundColor: "#d9a300",
@@ -95,6 +115,16 @@ export const DEFAULT_PREFIX_STYLE_SETTINGS: PrefixStyleSettings = {
 				textColor: "",
 				backgroundOpacity: 88,
 			},
+			statusBadge: {
+				backgroundColor: "",
+				textColor: "",
+				backgroundOpacity: 82,
+			},
+			statusTrailingBadge: {
+				backgroundColor: "",
+				textColor: "",
+				backgroundOpacity: 82,
+			},
 			warningBadge: {
 				backgroundColor: "",
 				textColor: "",
@@ -123,6 +153,11 @@ export function normalizePrefixStyleSettings(
 			conditionBadge: normalizeSlotSettings(
 				"conditionBadge",
 				value?.slots?.conditionBadge,
+			),
+			statusBadge: normalizeSlotSettings("statusBadge", value?.slots?.statusBadge),
+			statusTrailingBadge: normalizeSlotSettings(
+				"statusTrailingBadge",
+				value?.slots?.statusTrailingBadge,
 			),
 			warningBadge: normalizeSlotSettings("warningBadge", value?.slots?.warningBadge),
 			hiddenBadge: normalizeSlotSettings("hiddenBadge", value?.slots?.hiddenBadge),

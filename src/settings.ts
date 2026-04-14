@@ -1,11 +1,19 @@
 import { App, PluginSettingTab } from "obsidian";
 import type { ConditionalBadgeRule } from "./conditionalBadgeRules";
+import {
+	DEFAULT_STATUS_SUFFIX_RULES,
+	type StatusSuffixRule,
+} from "./statusSuffixRules";
 import { renderBasicSettingsSection } from "./basicSettingsSection";
 import { renderBadgeStyleSection } from "./badgeStyleSettingsSection";
 import {
 	renderConditionalBadgeSection,
 	type ConditionalBadgeSectionState,
 } from "./conditionalBadgeSettingsSection";
+import {
+	renderStatusSuffixSection,
+	type StatusSuffixSectionState,
+} from "./statusSuffixSettingsSection";
 import { createTranslator, type PluginLanguage } from "./i18n";
 import type ODecimalPlugin from "./main";
 import { DEFAULT_NUMERIC_PREFIX_PATTERN } from "./prefix";
@@ -29,6 +37,9 @@ export interface ODecimalSettings {
 	prefixDisplayMode: PrefixDisplayMode;
 	prefixPattern: string;
 	conditionalBadgeRules: ConditionalBadgeRule[];
+	statusSuffixRules: StatusSuffixRule[];
+	hideMatchedStatusSuffix: boolean;
+	showStatusSuffixTrailingBadge: boolean;
 	showMissingPrefixBadge: boolean;
 	showHiddenFiles: boolean;
 	showHiddenItemBadge: boolean;
@@ -44,6 +55,9 @@ export const DEFAULT_SETTINGS: ODecimalSettings = {
 	prefixDisplayMode: "badge",
 	prefixPattern: DEFAULT_NUMERIC_PREFIX_PATTERN,
 	conditionalBadgeRules: [],
+	statusSuffixRules: DEFAULT_STATUS_SUFFIX_RULES,
+	hideMatchedStatusSuffix: true,
+	showStatusSuffixTrailingBadge: false,
 	showMissingPrefixBadge: false,
 	showHiddenFiles: false,
 	showHiddenItemBadge: false,
@@ -55,6 +69,10 @@ export const DEFAULT_SETTINGS: ODecimalSettings = {
 export class ODecimalSettingTab extends PluginSettingTab {
 	plugin: ODecimalPlugin;
 	private readonly conditionalBadgeSectionState: ConditionalBadgeSectionState = {
+		openState: new Map<string, boolean>(),
+		draggingRuleId: null,
+	};
+	private readonly statusSuffixSectionState: StatusSuffixSectionState = {
 		openState: new Map<string, boolean>(),
 		draggingRuleId: null,
 	};
@@ -80,6 +98,13 @@ export class ODecimalSettingTab extends PluginSettingTab {
 			plugin: this.plugin,
 			t,
 			state: this.conditionalBadgeSectionState,
+		});
+		renderStatusSuffixSection({
+			app: this.app,
+			containerEl,
+			plugin: this.plugin,
+			t,
+			state: this.statusSuffixSectionState,
 		});
 		renderBadgeStyleSection({
 			containerEl,

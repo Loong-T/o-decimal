@@ -39,12 +39,25 @@ export function getExplorerFileItems(view: InternalFileExplorerView): InternalFi
 	return Object.values(view.fileItems).filter(isInternalFileTreeItem);
 }
 
+export function getExplorerRawName(file: TAbstractFile): string {
+	return file.name;
+}
+
 export function getExplorerDisplayName(file: TAbstractFile): string {
+	return getExplorerDisplayNameForName(file, getExplorerRawName(file));
+}
+
+export function getExplorerDisplayNameForName(
+	file: TAbstractFile,
+	rawName: string,
+): string {
 	if (file instanceof TFile && file.extension === "md") {
-		return file.basename;
+		return rawName.endsWith(".md")
+			? rawName.slice(0, -".md".length)
+			: file.basename;
 	}
 
-	return file.name;
+	return rawName;
 }
 
 export function refreshExplorerTitles(view: InternalFileExplorerView): void {

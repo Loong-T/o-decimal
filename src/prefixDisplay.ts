@@ -1,14 +1,17 @@
 import { setIcon, TFolder } from "obsidian";
-import {
-	findMatchingConditionalBadgeRule,
-	getConditionalBadgeRuleIconId,
-	type ConditionalBadgeRule,
-} from "./conditionalBadgeRules";
-import type { InternalFileTreeItem } from "./fileExplorer";
+import { type ConditionalBadgeRule, findMatchingConditionalBadgeRule, getConditionalBadgeRuleIconId } from "./conditionalBadgeRules";
+import { getExplorerDisplayNameForName, type InternalFileTreeItem } from "./fileExplorer";
 import { parseNumericPrefix, stripNumericPrefix } from "./prefix";
 import type { ODecimalSettings } from "./settings";
+import {
+	findMatchingStatusSuffixRule,
+	getStatusSuffixRuleIconId,
+	removeMatchedStatusSuffix,
+	splitNameForStatusSuffix,
+	type StatusSuffixRule,
+} from "./statusSuffixRules";
 
-interface ExtraBadgeDescriptor {
+interface BadgeDescriptor {
 	slotClass: string;
 	text: string;
 	tooltip: string;
@@ -16,12 +19,18 @@ interface ExtraBadgeDescriptor {
 	customSvg?: string;
 	backgroundColor?: string;
 	textColor?: string;
+	statusRuleId?: string;
 }
 
-interface PrefixDisplaySettings {
+interface PrefixDisplayOptions {
+	rawName: string;
+	displayName: string;
 	prefixDisplayMode: ODecimalSettings["prefixDisplayMode"];
 	prefixPattern: ODecimalSettings["prefixPattern"];
 	conditionalBadgeRules: ODecimalSettings["conditionalBadgeRules"];
+	statusSuffixRules: ODecimalSettings["statusSuffixRules"];
+	hideMatchedStatusSuffix: ODecimalSettings["hideMatchedStatusSuffix"];
+	showStatusSuffixTrailingBadge: ODecimalSettings["showStatusSuffixTrailingBadge"];
 	showMissingPrefixBadge: ODecimalSettings["showMissingPrefixBadge"];
 	showHiddenItemBadge: ODecimalSettings["showHiddenItemBadge"];
 	hiddenItemBadgeText: ODecimalSettings["hiddenItemBadgeText"];
@@ -29,19 +38,53 @@ interface PrefixDisplaySettings {
 	tooltipHiddenItem: string;
 	tooltipMissingPrefix: string;
 	tooltipPrefixBadgeLabel: string;
+	tooltipStatusSuffixLabel: string;
 }
 
 export function applyPrefixDisplay(
 	item: InternalFileTreeItem,
-	rawTitle: string,
-	settings: PrefixDisplaySettings,
+	options: PrefixDisplayOptions,
 ): void {
 	const { innerEl } = item;
-	const prefixMatch = parseNumericPrefix(rawTitle, settings.prefixPattern);
+	const statusMatch = findMatchingStatusSuffixRule(options.statusSuffixRules, {
+		file: item.file,
+		fullName: options.rawName,
+		matchableName: splitNameForStatusSuffix(item.file).matchableName,
+	});
+	const rawNameWithoutStatus = statusMatch
+		? buildNameWithoutStatus(item, statusMatch)
+		: options.rawName;
+	const displayNameWithoutStatus = getExplorerDisplayNameForName(
+		item.file,
+		rawNameWithoutStatus,
+	);
+	const effectiveDisplayName =
+		options.hideMatchedStatusSuffix && statusMatch
+			? displayNameWithoutStatus
+			: options.displayName;
+	const prefixMatch = parseNumericPrefix(
+		effectiveDisplayName,
+		options.prefixPattern,
+	);
 	const prefixBadgeKindClass = item.file instanceof TFolder
 		? "o-decimal-prefix-badge-folder"
 		: "o-decimal-prefix-badge-file";
-	const extraBadge = getExtraBadge(item, rawTitle, prefixMatch, settings);
+	const leadingBadge = getLeadingBadge(item, {
+		...options,
+		rawName: options.rawName,
+		displayName: effectiveDisplayName,
+	}, statusMatch, prefixMatch, prefixBadgeKindClass);
+	const trailingBadge = getTrailingStatusBadge(
+		statusMatch?.rule ?? null,
+		statusMatch?.matchedText ?? "",
+		options,
+	);
+	const renderedTitle = getRenderedTitleText(
+		effectiveDisplayName,
+		prefixMatch,
+		options,
+		!!statusMatch && !options.showStatusSuffixTrailingBadge,
+	);
 
 	innerEl.empty();
 	innerEl.removeClass(
@@ -50,35 +93,23 @@ export function applyPrefixDisplay(
 		"o-decimal-prefix-badge-file",
 		"o-decimal-prefix-badge-folder",
 		"o-decimal-prefix-has-extra-badges",
+		"o-decimal-prefix-has-trailing-badge",
 	);
 	innerEl.removeAttribute("data-o-decimal-prefix");
-	innerEl.setAttribute("title", rawTitle);
+	innerEl.setAttribute("title", options.rawName);
 
-	if (!prefixMatch || settings.prefixDisplayMode === "original") {
-		renderBadge(innerEl, extraBadge);
-		appendTitleText(innerEl, rawTitle, rawTitle);
-		return;
-	}
-
-	if (settings.prefixDisplayMode === "hidden") {
+	if (options.prefixDisplayMode === "hidden") {
 		innerEl.addClass("o-decimal-prefix-hidden");
-		renderBadge(innerEl, extraBadge);
-		appendTitleText(
-			innerEl,
-			stripNumericPrefix(rawTitle, settings.prefixPattern),
-			rawTitle,
-		);
-		return;
+	} else if (leadingBadge?.slotClass === prefixBadgeKindClass) {
+		innerEl.addClass("o-decimal-prefix-badge", prefixBadgeKindClass);
+		if (prefixMatch) {
+			innerEl.setAttribute("data-o-decimal-prefix", prefixMatch.rawPrefix);
+		}
 	}
 
-	innerEl.addClass("o-decimal-prefix-badge", prefixBadgeKindClass);
-	innerEl.setAttribute("data-o-decimal-prefix", prefixMatch.rawPrefix);
-	innerEl.createSpan({
-		cls: "o-decimal-prefix-badge-chip",
-		text: prefixMatch.badgeText,
-		title: `${settings.tooltipPrefixBadgeLabel}: ${prefixMatch.rawPrefix}`,
-	});
-	appendTitleText(innerEl, prefixMatch.rest, rawTitle);
+	renderBadge(innerEl, leadingBadge, "o-decimal-prefix-has-extra-badges");
+	appendTitleText(innerEl, renderedTitle, options.rawName);
+	renderBadge(innerEl, trailingBadge, "o-decimal-prefix-has-trailing-badge");
 }
 
 export function restoreRawTitle(item: InternalFileTreeItem, rawTitle: string): void {
@@ -89,67 +120,168 @@ export function restoreRawTitle(item: InternalFileTreeItem, rawTitle: string): v
 		"o-decimal-prefix-badge-file",
 		"o-decimal-prefix-badge-folder",
 		"o-decimal-prefix-has-extra-badges",
+		"o-decimal-prefix-has-trailing-badge",
 	);
 	item.innerEl.removeAttribute("data-o-decimal-prefix");
 	item.innerEl.setText(rawTitle);
 }
 
-function getExtraBadge(
+function buildNameWithoutStatus(
 	item: InternalFileTreeItem,
-	rawTitle: string,
+	match: NonNullable<ReturnType<typeof findMatchingStatusSuffixRule>>,
+): string {
+	const parts = splitNameForStatusSuffix(item.file);
+	const cleanBaseName = removeMatchedStatusSuffix(parts.matchableName, match);
+	return `${cleanBaseName}${parts.extensionSuffix}`;
+}
+
+function getLeadingBadge(
+	item: InternalFileTreeItem,
+	options: PrefixDisplayOptions,
+	statusMatch: ReturnType<typeof findMatchingStatusSuffixRule>,
 	prefixMatch: ReturnType<typeof parseNumericPrefix>,
-	settings: PrefixDisplaySettings,
-): ExtraBadgeDescriptor | null {
-	if (prefixMatch && settings.prefixDisplayMode === "badge") {
-		return null;
+	prefixBadgeKindClass: string,
+): BadgeDescriptor | null {
+	if (statusMatch && !options.showStatusSuffixTrailingBadge) {
+		return toStatusBadgeDescriptor(
+			statusMatch.rule,
+			statusMatch.matchedText,
+			options.tooltipStatusSuffixLabel,
+			"o-decimal-prefix-badge-status",
+		);
+	}
+
+	if (prefixMatch && options.prefixDisplayMode === "badge") {
+		return {
+			slotClass: prefixBadgeKindClass,
+			text: prefixMatch.badgeText,
+			tooltip: `${options.tooltipPrefixBadgeLabel}: ${prefixMatch.rawPrefix}`,
+		};
 	}
 
 	const conditionalRule = findMatchingConditionalBadgeRule(
-		settings.conditionalBadgeRules,
+		options.conditionalBadgeRules,
 		{
 			file: item.file,
-			rawTitle,
+			rawTitle: options.displayName,
 		},
 	);
 	if (conditionalRule) {
 		return toConditionalBadgeDescriptor(conditionalRule);
 	}
 
-	if (settings.showHiddenItemBadge && isHiddenItem(rawTitle)) {
+	if (options.showHiddenItemBadge && isHiddenItem(options.rawName)) {
 		return {
 			slotClass: "o-decimal-prefix-badge-hidden-file",
-			text: settings.hiddenItemBadgeText,
-			tooltip: settings.tooltipHiddenItem,
+			text: options.hiddenItemBadgeText,
+			tooltip: options.tooltipHiddenItem,
 		};
 	}
 
-	if (settings.showMissingPrefixBadge && !prefixMatch) {
+	if (options.showMissingPrefixBadge && !prefixMatch) {
 		return {
 			slotClass: "o-decimal-prefix-badge-warning",
-			text: settings.missingPrefixBadgeText,
-			tooltip: settings.tooltipMissingPrefix,
+			text: options.missingPrefixBadgeText,
+			tooltip: options.tooltipMissingPrefix,
 		};
 	}
 
 	return null;
 }
 
+function getTrailingStatusBadge(
+	rule: StatusSuffixRule | null,
+	matchedText: string,
+	options: Pick<
+		PrefixDisplayOptions,
+		"showStatusSuffixTrailingBadge" | "tooltipStatusSuffixLabel"
+	>,
+): BadgeDescriptor | null {
+	if (!rule || !options.showStatusSuffixTrailingBadge) {
+		return null;
+	}
+
+	return toStatusBadgeDescriptor(
+		rule,
+		matchedText,
+		options.tooltipStatusSuffixLabel,
+		"o-decimal-prefix-badge-status-trailing",
+	);
+}
+
+function getRenderedTitleText(
+	displayName: string,
+	prefixMatch: ReturnType<typeof parseNumericPrefix>,
+	options: Pick<PrefixDisplayOptions, "prefixDisplayMode" | "prefixPattern">,
+	hasStatusBadge: boolean,
+): string {
+	if (!prefixMatch || options.prefixDisplayMode === "original") {
+		return displayName;
+	}
+
+	if (
+		options.prefixDisplayMode === "hidden" ||
+		(options.prefixDisplayMode === "badge" && hasStatusBadge)
+	) {
+		return stripNumericPrefix(displayName, options.prefixPattern);
+	}
+
+	return prefixMatch.rest;
+}
+
+function toConditionalBadgeDescriptor(rule: ConditionalBadgeRule): BadgeDescriptor {
+	return {
+		slotClass: "o-decimal-prefix-badge-conditional",
+		text: rule.text,
+		tooltip: rule.tooltip || rule.pattern,
+		icon: getConditionalBadgeRuleIconId(rule) ?? undefined,
+		customSvg: rule.customSvg,
+		backgroundColor: rule.backgroundColor,
+		textColor: rule.textColor,
+	};
+}
+
+function toStatusBadgeDescriptor(
+	rule: StatusSuffixRule,
+	matchedText: string,
+	tooltipLabel: string,
+	slotClass: string,
+): BadgeDescriptor {
+	return {
+		slotClass,
+		text: rule.text,
+		tooltip: rule.tooltip || `${tooltipLabel}: ${matchedText}`,
+		icon: getStatusSuffixRuleIconId(rule) ?? undefined,
+		customSvg: rule.customSvg,
+		backgroundColor: rule.backgroundColor,
+		textColor: rule.textColor,
+		statusRuleId: rule.id,
+	};
+}
+
 function isHiddenItem(rawTitle: string): boolean {
 	return rawTitle.startsWith(".");
 }
 
-function renderBadge(innerEl: HTMLElement, badge: ExtraBadgeDescriptor | null): void {
+function renderBadge(
+	innerEl: HTMLElement,
+	badge: BadgeDescriptor | null,
+	containerClass: string,
+): void {
 	if (!badge) {
 		return;
 	}
 
-	innerEl.addClass("o-decimal-prefix-has-extra-badges");
+	innerEl.addClass(containerClass);
 	const badgeEl = innerEl.createSpan({
 		cls: `o-decimal-prefix-badge-chip ${badge.slotClass}`,
 		attr: {
 			title: badge.tooltip,
 		},
 	});
+	if (badge.statusRuleId) {
+		badgeEl.setAttribute("data-o-decimal-status-rule", badge.statusRuleId);
+	}
 	const backgroundColor = badge.backgroundColor ?? "";
 	if (backgroundColor.trim().length > 0) {
 		badgeEl.style.background = backgroundColor;
@@ -182,20 +314,6 @@ function appendTitleText(innerEl: HTMLElement, text: string, rawTitle: string): 
 		text,
 		title: rawTitle,
 	});
-}
-
-function toConditionalBadgeDescriptor(
-	rule: ConditionalBadgeRule,
-): ExtraBadgeDescriptor {
-	return {
-		slotClass: "o-decimal-prefix-badge-conditional",
-		text: rule.text,
-		tooltip: rule.tooltip || rule.pattern,
-		icon: getConditionalBadgeRuleIconId(rule) ?? undefined,
-		customSvg: rule.customSvg,
-		backgroundColor: rule.backgroundColor,
-		textColor: rule.textColor,
-	};
 }
 
 function safeSetIcon(el: HTMLElement, icon: string): void {

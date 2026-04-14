@@ -1,4 +1,5 @@
 import type { ConditionalBadgeRule } from "./conditionalBadgeRules";
+import type { StatusSuffixRule } from "./statusSuffixRules";
 import type {
 	PrefixStyleSettings,
 	PrefixStyleSlotId,
@@ -41,6 +42,37 @@ export function moveConditionalBadgeRule(
 	fromIndex: number,
 	toIndex: number,
 ): ConditionalBadgeRule[] {
+	return moveRule(rules, fromIndex, toIndex);
+}
+
+export function updateStatusSuffixRuleAt(
+	rules: StatusSuffixRule[],
+	index: number,
+	update: Partial<StatusSuffixRule>,
+): StatusSuffixRule[] {
+	return rules.map((rule, currentIndex) =>
+		currentIndex === index
+			? {
+				...rule,
+				...update,
+			}
+			: rule,
+	);
+}
+
+export function moveStatusSuffixRule(
+	rules: StatusSuffixRule[],
+	fromIndex: number,
+	toIndex: number,
+): StatusSuffixRule[] {
+	return moveRule(rules, fromIndex, toIndex);
+}
+
+function moveRule<T>(
+	rules: T[],
+	fromIndex: number,
+	toIndex: number,
+): T[] {
 	if (
 		fromIndex === toIndex ||
 		fromIndex < 0 ||

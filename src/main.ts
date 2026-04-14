@@ -1,9 +1,19 @@
-import { addIcon, Notice, Plugin } from "obsidian";
+import { addIcon, Notice, Plugin, TAbstractFile, normalizePath } from "obsidian";
 import {
 	DEFAULT_CONDITIONAL_BADGE_RULES,
 	getConditionalBadgeRuleIconId,
 	normalizeConditionalBadgeRules,
 } from "./conditionalBadgeRules";
+import {
+	DEFAULT_STATUS_SUFFIX_RULES,
+	deriveStatusSuffixWriteBack,
+	findMatchingStatusSuffixRule,
+	getStatusSuffixRuleIconId,
+	normalizeStatusSuffixRules,
+	removeMatchedStatusSuffix,
+	splitNameForStatusSuffix,
+	type StatusSuffixRule,
+} from "./statusSuffixRules";
 import { FileExplorerEnhancer } from "./fileExplorerEnhancer";
 import { HiddenFilesManager } from "./hiddenFilesManager";
 import { createTranslator } from "./i18n";
@@ -25,6 +35,7 @@ export default class ODecimalPlugin extends Plugin {
 		registerCustomBadgeIcons();
 		await this.loadSettings();
 		registerConditionalBadgeRuleIcons(this.settings);
+		registerStatusSuffixRuleIcons(this.settings);
 
 		this.styleManager = new StyleManager();
 		this.styleManager.apply(this.settings.prefixStyles);
@@ -36,6 +47,7 @@ export default class ODecimalPlugin extends Plugin {
 		this.enhancer.start();
 
 		this.registerCommands();
+		this.registerStatusSuffixMenu();
 		this.addSettingTab(new ODecimalSettingTab(this.app, this));
 
 		this.app.workspace.onLayoutReady(() => {
@@ -65,15 +77,21 @@ export default class ODecimalPlugin extends Plugin {
 			update.conditionalBadgeRules !== undefined
 				? normalizeConditionalBadgeRules(update.conditionalBadgeRules)
 				: this.settings.conditionalBadgeRules;
+		const normalizedStatusSuffixRules =
+			update.statusSuffixRules !== undefined
+				? normalizeStatusSuffixRules(update.statusSuffixRules)
+				: this.settings.statusSuffixRules;
 		this.settings = {
 			...this.settings,
 			...update,
 			prefixPattern: normalizedPrefixPattern,
 			conditionalBadgeRules: normalizedConditionalBadgeRules,
+			statusSuffixRules: normalizedStatusSuffixRules,
 			prefixStyles: update.prefixStyles ?? this.settings.prefixStyles,
 		};
 		await this.saveSettings();
 		registerConditionalBadgeRuleIcons(this.settings);
+		registerStatusSuffixRuleIcons(this.settings);
 		this.styleManager?.apply(this.settings.prefixStyles);
 		this.hiddenFilesManager?.scheduleSync();
 		this.enhancer?.scheduleRefreshAll({ requestNativeSort: true });
@@ -98,6 +116,9 @@ export default class ODecimalPlugin extends Plugin {
 					: DEFAULT_NUMERIC_PREFIX_PATTERN,
 			conditionalBadgeRules: normalizeConditionalBadgeRules(
 				loadedData?.conditionalBadgeRules ?? DEFAULT_CONDITIONAL_BADGE_RULES,
+			),
+			statusSuffixRules: normalizeStatusSuffixRules(
+				loadedData?.statusSuffixRules ?? DEFAULT_STATUS_SUFFIX_RULES,
 			),
 			prefixStyles: normalizePrefixStyleSettings(loadedData?.prefixStyles),
 		};
@@ -175,6 +196,67 @@ export default class ODecimalPlugin extends Plugin {
 		});
 	}
 
+	private registerStatusSuffixMenu(): void {
+		this.registerEvent(
+			this.app.workspace.on("file-menu", (menu, file) => {
+				const enabledRules = this.settings.statusSuffixRules.filter(
+					(rule) =>
+						rule.enabled &&
+						rule.showInContextMenu &&
+						deriveStatusSuffixWriteBack(rule.pattern).length > 0,
+				);
+				const matchContext = {
+					file,
+					fullName: file.name,
+					matchableName: splitNameForStatusSuffix(file).matchableName,
+				};
+				const currentMatch = findMatchingStatusSuffixRule(
+					this.settings.statusSuffixRules,
+					matchContext,
+				);
+				if (enabledRules.length === 0 && !currentMatch) {
+					return;
+				}
+
+				const t = createTranslator(this.settings.language);
+				menu.addSeparator();
+				menu.addItem((item) =>
+					item
+						.setTitle(t("statusSuffixMenuLabel"))
+						.setIsLabel(true)
+						.setSection("o-decimal-status-suffix"),
+				);
+
+				for (const rule of enabledRules) {
+					menu.addItem((item) =>
+						item
+							.setTitle(
+								t("statusSuffixMenuSetRule", {
+									status: getStatusSuffixRuleMenuLabel(rule),
+								}),
+							)
+							.setSection("o-decimal-status-suffix")
+							.setChecked(currentMatch?.rule.id === rule.id)
+							.onClick(() => {
+								void this.applyStatusSuffixRule(file, rule);
+							}),
+					);
+				}
+
+				if (currentMatch) {
+					menu.addItem((item) =>
+						item
+							.setTitle(t("statusSuffixMenuClear"))
+							.setSection("o-decimal-status-suffix")
+							.onClick(() => {
+								void this.clearStatusSuffix(file);
+							}),
+					);
+				}
+			}),
+		);
+	}
+
 	private async setPrefixDisplayMode(mode: PrefixDisplayMode): Promise<void> {
 		if (this.settings.prefixDisplayMode === mode) {
 			return;
@@ -189,6 +271,55 @@ export default class ODecimalPlugin extends Plugin {
 			t("noticePrefixDisplayChanged", {
 				mode: getPrefixDisplayModeLabel(t, mode),
 			}),
+		);
+	}
+
+	private async applyStatusSuffixRule(
+		file: TAbstractFile,
+		rule: StatusSuffixRule,
+	): Promise<void> {
+		const writeBackSuffix = deriveStatusSuffixWriteBack(rule.pattern);
+		if (writeBackSuffix.length === 0) {
+			return;
+		}
+
+		const parts = splitNameForStatusSuffix(file);
+		const currentMatch = findMatchingStatusSuffixRule(this.settings.statusSuffixRules, {
+			file,
+			fullName: file.name,
+			matchableName: parts.matchableName,
+		});
+		const nextBaseName = `${removeMatchedStatusSuffix(parts.matchableName, currentMatch)}${writeBackSuffix}`;
+		const nextName = `${nextBaseName}${parts.extensionSuffix}`;
+		if (nextName === file.name) {
+			return;
+		}
+
+		await this.app.fileManager.renameFile(
+			file,
+			buildSiblingPath(file, nextName),
+		);
+	}
+
+	private async clearStatusSuffix(file: TAbstractFile): Promise<void> {
+		const parts = splitNameForStatusSuffix(file);
+		const currentMatch = findMatchingStatusSuffixRule(this.settings.statusSuffixRules, {
+			file,
+			fullName: file.name,
+			matchableName: parts.matchableName,
+		});
+		if (!currentMatch) {
+			return;
+		}
+
+		const nextName = `${removeMatchedStatusSuffix(parts.matchableName, currentMatch)}${parts.extensionSuffix}`;
+		if (nextName === file.name) {
+			return;
+		}
+
+		await this.app.fileManager.renameFile(
+			file,
+			buildSiblingPath(file, nextName),
 		);
 	}
 }
@@ -217,6 +348,36 @@ function registerConditionalBadgeRuleIcons(settings: ODecimalSettings): void {
 
 		addIcon(iconId, rule.customSvg);
 	}
+}
+
+function registerStatusSuffixRuleIcons(settings: ODecimalSettings): void {
+	for (const rule of settings.statusSuffixRules) {
+		if (rule.customSvg.trim().length === 0) {
+			continue;
+		}
+
+		const iconId = getStatusSuffixRuleIconId(rule);
+		if (!iconId) {
+			continue;
+		}
+
+		addIcon(iconId, rule.customSvg);
+	}
+}
+
+function getStatusSuffixRuleMenuLabel(rule: StatusSuffixRule): string {
+	if (rule.name.trim().length > 0) {
+		return rule.name;
+	}
+	if (rule.text.trim().length > 0) {
+		return rule.text;
+	}
+	return deriveStatusSuffixWriteBack(rule.pattern);
+}
+
+function buildSiblingPath(file: TAbstractFile, name: string): string {
+	const parentPath = file.parent?.path ?? "";
+	return normalizePath(parentPath.length > 0 ? `${parentPath}/${name}` : name);
 }
 
 function getNextPrefixDisplayMode(current: PrefixDisplayMode): PrefixDisplayMode {

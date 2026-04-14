@@ -176,6 +176,28 @@ function renderConditionalBadgeRule({
 					index: String(index + 1),
 				}),
 	});
+	const summaryActionsEl = summaryEl.createSpan({
+		cls: "o-decimal-conditional-rule-summary-actions",
+	});
+	const deleteButtonEl = summaryActionsEl.createEl("button", {
+		cls: "clickable-icon o-decimal-conditional-rule-delete",
+		attr: {
+			type: "button",
+			"aria-label": t("conditionalBadgeDeleteRule"),
+			title: t("conditionalBadgeDeleteRule"),
+		},
+	});
+	setIcon(deleteButtonEl, "trash");
+	deleteButtonEl.addEventListener("click", (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		state.openState.delete(rule.id);
+		void updateConditionalBadgeRules(
+			plugin.settings.conditionalBadgeRules.filter(
+				(_, currentIndex) => currentIndex !== index,
+			),
+		);
+	});
 	const dragHandleEl = summaryEl.createSpan({
 		cls: "o-decimal-conditional-rule-drag-handle",
 		attr: {
@@ -186,6 +208,7 @@ function renderConditionalBadgeRule({
 		},
 	});
 	dragHandleEl.setText("⋮⋮");
+	summaryActionsEl.appendChild(dragHandleEl);
 	dragHandleEl.addEventListener("click", (event) => {
 		event.preventDefault();
 		event.stopPropagation();
@@ -354,19 +377,6 @@ function renderConditionalBadgeRule({
 					),
 				);
 			}),
-		)
-		.addExtraButton((button) =>
-			button
-				.setIcon("trash")
-				.setTooltip(t("conditionalBadgeDeleteRule"))
-				.onClick(async () => {
-					state.openState.delete(rule.id);
-					await updateConditionalBadgeRules(
-						plugin.settings.conditionalBadgeRules.filter(
-							(_, currentIndex) => currentIndex !== index,
-						),
-					);
-				}),
 		);
 }
 

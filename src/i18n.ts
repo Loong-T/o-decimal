@@ -58,6 +58,56 @@ type TranslationKey =
 	| "typePriorityMixed"
 	| "typePriorityFoldersFirst"
 	| "typePriorityFilesFirst"
+	| "statusSuffixHeading"
+	| "statusSuffixDesc"
+	| "hideMatchedStatusSuffixName"
+	| "hideMatchedStatusSuffixDesc"
+	| "showStatusSuffixTrailingBadgeName"
+	| "showStatusSuffixTrailingBadgeDesc"
+	| "statusSuffixRuleSummary"
+	| "statusSuffixRuleSummaryEmpty"
+	| "statusSuffixNameName"
+	| "statusSuffixNameDesc"
+	| "statusSuffixEnabledName"
+	| "statusSuffixEnabledDesc"
+	| "statusSuffixTargetName"
+	| "statusSuffixTargetDesc"
+	| "statusSuffixTargetBoth"
+	| "statusSuffixTargetFile"
+	| "statusSuffixTargetFolder"
+	| "statusSuffixPatternName"
+	| "statusSuffixPatternDesc"
+	| "statusSuffixReplaceWithName"
+	| "statusSuffixReplaceWithDesc"
+	| "statusSuffixShowInMenuName"
+	| "statusSuffixShowInMenuDesc"
+	| "statusSuffixIconName"
+	| "statusSuffixIconDescEmpty"
+	| "statusSuffixIconDescSelected"
+	| "statusSuffixPickIcon"
+	| "statusSuffixClearIcon"
+	| "statusSuffixCustomSvgName"
+	| "statusSuffixCustomSvgDesc"
+	| "statusSuffixCustomSvgDescSelected"
+	| "statusSuffixChooseSvgFile"
+	| "statusSuffixClearSvgFile"
+	| "statusSuffixBackgroundColorName"
+	| "statusSuffixBackgroundColorDesc"
+	| "statusSuffixTextColorName"
+	| "statusSuffixTextColorDesc"
+	| "statusSuffixTextName"
+	| "statusSuffixTextDesc"
+	| "statusSuffixTooltipName"
+	| "statusSuffixTooltipDesc"
+	| "statusSuffixDragHandle"
+	| "statusSuffixDeleteRule"
+	| "statusSuffixAddRuleName"
+	| "statusSuffixAddRuleDesc"
+	| "statusSuffixAddRuleButton"
+	| "statusSuffixMenuLabel"
+	| "statusSuffixMenuSetRule"
+	| "statusSuffixMenuClear"
+	| "tooltipStatusSuffixLabel"
 	| "conditionalBadgesHeading"
 	| "conditionalBadgesDesc"
 	| "conditionalBadgeRuleSummary"
@@ -117,6 +167,8 @@ type TranslationKey =
 	| "fileBadgeHeading"
 	| "folderBadgeHeading"
 	| "conditionBadgeHeading"
+	| "statusBadgeHeading"
+	| "statusTrailingBadgeHeading"
 	| "warningBadgeHeading"
 	| "hiddenBadgeHeading"
 	| "badgeBackgroundColorName"
@@ -204,6 +256,67 @@ const TRANSLATIONS: Record<
 		typePriorityMixed: "Mixed",
 		typePriorityFoldersFirst: "Folders first",
 		typePriorityFilesFirst: "Files first",
+		statusSuffixHeading: "Status suffix",
+		statusSuffixDesc:
+			"Status suffix badges have the highest priority among leading badges. The first matching status rule can also be written back from the file menu.",
+		hideMatchedStatusSuffixName: "Hide matched status text",
+		hideMatchedStatusSuffixDesc:
+			"Hide matched suffix text from the displayed title, such as _[done].",
+		showStatusSuffixTrailingBadgeName: "Show trailing status badge",
+		showStatusSuffixTrailingBadgeDesc:
+			"Show an extra status badge after the title while keeping the leading status badge as the highest priority badge.",
+		statusSuffixRuleSummary: "Status rule {{index}}: {{name}}",
+		statusSuffixRuleSummaryEmpty: "Status rule {{index}}",
+		statusSuffixNameName: "Rule name",
+		statusSuffixNameDesc: "Only shown in settings so you can recognize this rule.",
+		statusSuffixEnabledName: "Enable this rule",
+		statusSuffixEnabledDesc: "Turn this off without deleting the rule.",
+		statusSuffixTargetName: "Target",
+		statusSuffixTargetDesc: "Choose which kinds of items this rule can match.",
+		statusSuffixTargetBoth: "Files and folders",
+		statusSuffixTargetFile: "Files only",
+		statusSuffixTargetFolder: "Folders only",
+		statusSuffixPatternName: "Suffix regex",
+		statusSuffixPatternDesc:
+			"Matched against the filename part before the first dot. Example: _\\[done\\]$",
+		statusSuffixReplaceWithName: "Write-back suffix",
+		statusSuffixReplaceWithDesc:
+			"Used by the file menu when setting this status. Example: _[done]",
+		statusSuffixShowInMenuName: "Show in file menu",
+		statusSuffixShowInMenuDesc:
+			"Allow this rule to appear in the file or folder context menu.",
+		statusSuffixIconName: "Icon",
+		statusSuffixIconDescEmpty: "No icon selected. You can still show text only.",
+		statusSuffixIconDescSelected: "Selected icon: {{icon}}",
+		statusSuffixPickIcon: "Choose icon",
+		statusSuffixClearIcon: "Clear icon",
+		statusSuffixCustomSvgName: "Custom SVG",
+		statusSuffixCustomSvgDesc:
+			"Optional. If set, it replaces the icon above and follows the badge text color.",
+		statusSuffixCustomSvgDescSelected: "Selected SVG file: {{file}}",
+		statusSuffixChooseSvgFile: "Choose SVG file",
+		statusSuffixClearSvgFile: "Clear SVG file",
+		statusSuffixBackgroundColorName: "Badge background color",
+		statusSuffixBackgroundColorDesc:
+			"Optional. Override the background color for this status rule only.",
+		statusSuffixTextColorName: "Badge text color",
+		statusSuffixTextColorDesc:
+			"Optional. Override the text and icon color for this status rule only.",
+		statusSuffixTextName: "Badge text",
+		statusSuffixTextDesc:
+			"Short text shown after the icon. Leave empty to show only the icon.",
+		statusSuffixTooltipName: "Tooltip",
+		statusSuffixTooltipDesc: "Shown when hovering over the badge.",
+		statusSuffixDragHandle: "Drag to reorder",
+		statusSuffixDeleteRule: "Delete rule",
+		statusSuffixAddRuleName: "Add status rule",
+		statusSuffixAddRuleDesc:
+			"Rules are checked from top to bottom. The first matching status wins.",
+		statusSuffixAddRuleButton: "Add rule",
+		statusSuffixMenuLabel: "Status",
+		statusSuffixMenuSetRule: "Set status: {{status}}",
+		statusSuffixMenuClear: "Clear status",
+		tooltipStatusSuffixLabel: "Status",
 		conditionalBadgesHeading: "Conditional badges",
 		conditionalBadgesDesc:
 			"Only one badge is shown per item. Order: prefix badge, first matching rule, hidden-item badge, then missing-prefix badge.",
@@ -275,6 +388,8 @@ const TRANSLATIONS: Record<
 		fileBadgeHeading: "File badge",
 		folderBadgeHeading: "Folder badge",
 		conditionBadgeHeading: "Conditional badge",
+		statusBadgeHeading: "Status badge",
+		statusTrailingBadgeHeading: "Trailing status badge",
 		warningBadgeHeading: "Missing-prefix badge",
 		hiddenBadgeHeading: "Hidden-item badge",
 		badgeBackgroundColorName: "Background color",
@@ -360,6 +475,67 @@ const TRANSLATIONS: Record<
 		typePriorityMixed: "混排",
 		typePriorityFoldersFirst: "文件夹优先",
 		typePriorityFilesFirst: "文件优先",
+		statusSuffixHeading: "状态后缀",
+		statusSuffixDesc:
+			"状态后缀 Badge 在所有前置 Badge 中优先级最高。第一条命中的状态规则也可以从文件菜单直接写回。",
+		hideMatchedStatusSuffixName: "隐藏已匹配的状态文本",
+		hideMatchedStatusSuffixDesc:
+			"在显示标题中隐藏已匹配的后缀文本，例如 _[done]。",
+		showStatusSuffixTrailingBadgeName: "显示名称末尾状态 Badge",
+		showStatusSuffixTrailingBadgeDesc:
+			"在保留前置状态 Badge 的同时，在标题末尾额外显示一个状态 Badge。",
+		statusSuffixRuleSummary: "状态规则 {{index}}：{{name}}",
+		statusSuffixRuleSummaryEmpty: "状态规则 {{index}}",
+		statusSuffixNameName: "规则名称",
+		statusSuffixNameDesc: "只在设置里显示，方便你识别这条规则。",
+		statusSuffixEnabledName: "启用此规则",
+		statusSuffixEnabledDesc: "关闭后会保留规则，但暂时不生效。",
+		statusSuffixTargetName: "作用对象",
+		statusSuffixTargetDesc: "选择这条规则可以匹配哪些项目。",
+		statusSuffixTargetBoth: "文件和文件夹",
+		statusSuffixTargetFile: "仅文件",
+		statusSuffixTargetFolder: "仅文件夹",
+		statusSuffixPatternName: "后缀正则",
+		statusSuffixPatternDesc:
+			"只匹配第一个点号前的文件名部分。例：_\\[done\\]$",
+		statusSuffixReplaceWithName: "写回后缀",
+		statusSuffixReplaceWithDesc:
+			"从文件菜单设置状态时写入的标准后缀。例：_[done]",
+		statusSuffixShowInMenuName: "显示在文件菜单中",
+		statusSuffixShowInMenuDesc:
+			"允许这条规则出现在文件或文件夹右键菜单里。",
+		statusSuffixIconName: "图标",
+		statusSuffixIconDescEmpty: "当前未选择图标，也可以只显示文字。",
+		statusSuffixIconDescSelected: "当前图标：{{icon}}",
+		statusSuffixPickIcon: "选择图标",
+		statusSuffixClearIcon: "清除图标",
+		statusSuffixCustomSvgName: "自定义 SVG",
+		statusSuffixCustomSvgDesc:
+			"可选。设置后会替代上方图标，并跟随 Badge 文字颜色着色。",
+		statusSuffixCustomSvgDescSelected: "当前 SVG 文件：{{file}}",
+		statusSuffixChooseSvgFile: "选择 SVG 文件",
+		statusSuffixClearSvgFile: "清除 SVG 文件",
+		statusSuffixBackgroundColorName: "Badge 背景颜色",
+		statusSuffixBackgroundColorDesc:
+			"可选。只覆盖这条状态规则的背景颜色。",
+		statusSuffixTextColorName: "Badge 文字颜色",
+		statusSuffixTextColorDesc:
+			"可选。只覆盖这条状态规则的文字和图标颜色。",
+		statusSuffixTextName: "Badge 文本",
+		statusSuffixTextDesc:
+			"显示在图标后面的短文字。留空则只显示图标。",
+		statusSuffixTooltipName: "提示文本",
+		statusSuffixTooltipDesc: "鼠标悬停在 Badge 上时显示。",
+		statusSuffixDragHandle: "拖动排序",
+		statusSuffixDeleteRule: "删除规则",
+		statusSuffixAddRuleName: "添加状态规则",
+		statusSuffixAddRuleDesc:
+			"规则会从上到下依次检查，第一条命中的状态规则优先生效。",
+		statusSuffixAddRuleButton: "添加规则",
+		statusSuffixMenuLabel: "状态",
+		statusSuffixMenuSetRule: "设为状态：{{status}}",
+		statusSuffixMenuClear: "清除状态",
+		tooltipStatusSuffixLabel: "状态",
 		conditionalBadgesHeading: "条件 Badge",
 		conditionalBadgesDesc:
 			"同一条目只显示一个 Badge。顺序是：前缀 Badge、第一条命中的规则、隐藏项 Badge、无前缀 Badge。",
@@ -426,6 +602,8 @@ const TRANSLATIONS: Record<
 		fileBadgeHeading: "文件 Badge",
 		folderBadgeHeading: "文件夹 Badge",
 		conditionBadgeHeading: "条件 Badge",
+		statusBadgeHeading: "状态 Badge",
+		statusTrailingBadgeHeading: "名称末尾状态 Badge",
 		warningBadgeHeading: "无前缀 Badge",
 		hiddenBadgeHeading: "隐藏项 Badge",
 		badgeBackgroundColorName: "背景颜色",

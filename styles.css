@@ -172,7 +172,8 @@
 }
 
 .o-decimal-prefix-hidden,
-.o-decimal-prefix-has-extra-badges {
+.o-decimal-prefix-has-extra-badges,
+.o-decimal-prefix-has-trailing-badge {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.45em;
@@ -228,6 +229,42 @@
 		transparent
 	);
 	color: var(--o-decimal-conditionBadge-text-color, var(--text-on-accent));
+}
+
+.o-decimal-prefix-badge-status {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.2em;
+	min-height: 1.6em;
+	text-align: center;
+	background: color-mix(
+		in srgb,
+		var(--o-decimal-statusBadge-background-color, #1f9d55)
+			var(--o-decimal-statusBadge-background-opacity, 82%),
+		transparent
+	);
+	color: var(--o-decimal-statusBadge-text-color, #ffffff);
+}
+
+.o-decimal-prefix-badge-status-trailing {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.6em;
+	height: 1.6em;
+	min-width: 1.6em;
+	min-height: 1.6em;
+	padding: 4px;
+	border-radius: 999px;
+	text-align: center;
+	background: color-mix(
+		in srgb,
+		var(--o-decimal-statusTrailingBadge-background-color, #1f9d55)
+			var(--o-decimal-statusTrailingBadge-background-opacity, 82%),
+		transparent
+	);
+	color: var(--o-decimal-statusTrailingBadge-text-color, #ffffff);
 }
 
 .o-decimal-prefix-badge-warning {
@@ -327,7 +364,8 @@
 	transition: transform 120ms ease;
 }
 
-.o-decimal-conditional-rule[open] > .o-decimal-conditional-rule-summary::before {
+.o-decimal-conditional-rule[open]
+	> .o-decimal-conditional-rule-summary::before {
 	transform: rotate(90deg);
 }
 
@@ -339,6 +377,13 @@
 	white-space: nowrap;
 }
 
+.o-decimal-conditional-rule-summary-actions {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+
 .o-decimal-conditional-rule-drag-handle {
 	flex: 0 0 auto;
 	color: var(--text-faint);
@@ -347,6 +392,11 @@
 	line-height: 1;
 	letter-spacing: -0.12em;
 	user-select: none;
+}
+
+.o-decimal-conditional-rule-delete {
+	flex: 0 0 auto;
+	color: var(--text-muted);
 }
 
 .o-decimal-conditional-rule.is-dragging {
@@ -421,7 +471,9 @@
 	color: currentcolor;
 }
 
-.o-decimal-icon-picker-trigger-has-icon .o-decimal-icon-picker-trigger-icon svg {
+.o-decimal-icon-picker-trigger-has-icon
+	.o-decimal-icon-picker-trigger-icon
+	svg {
 	width: 1rem;
 	height: 1rem;
 }
