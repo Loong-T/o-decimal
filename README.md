@@ -13,6 +13,7 @@ It improves the **file explorer only**:
 - prefixes can be shown more cleanly
 - files and folders can be sorted together by prefix
 - badges can be added for special files such as `README.md` or hidden items
+- status suffixes such as `_[done]` can be hidden and shown as badges
 
 It does **not** rename files, change links, or modify note content.
 
@@ -105,7 +106,37 @@ You can optionally show hidden files and folders such as `.obsidian` or `.gitign
 
 In large vaults, switching this may take a moment.
 
-#### 6. Badge styling
+#### 6. Status suffix badges
+
+You can define status suffix rules for files and folders.
+
+Examples:
+
+- `Task_[done].md`
+- `Archive_[done].tar.gz`
+- `Project_[done]`
+
+Each rule can define:
+
+- a display name
+- target type: files, folders, or both
+- a suffix regex matched before the first `.`
+- an icon or custom SVG
+- optional badge text
+- optional tooltip
+- optional custom colors
+- whether the rule appears in the file context menu
+
+Status suffix badges have the highest priority among leading badges.
+
+If you enable the trailing status badge option:
+
+- the status badge moves to the end of the title
+- the leading badge slot becomes available to prefix / conditional / hidden / missing-prefix badges again
+
+You can also set or clear a status directly from the file or folder context menu.
+
+#### 7. Badge styling
 
 You can customize badge appearance, including:
 
@@ -116,7 +147,7 @@ You can customize badge appearance, including:
 
 Different badge types can be styled separately.
 
-#### 7. Command palette shortcuts
+#### 8. Command palette shortcuts
 
 Commands are included for quickly switching:
 
@@ -133,8 +164,8 @@ Commands are included for quickly switching:
 cd <Your Vault>/.obsidian/plugins
 git clone https://github.com/Loong-T/o-decimal.git nerd-is-in-o-decimal
 cd nerd-is-in-o-decimal
-npm install
-npm run build
+pnpm install
+pnpm build
 ```
 
 Then open **Settings → Community plugins**, refresh the plugin list, and enable `O Decimal`.
@@ -167,6 +198,7 @@ You can configure:
 - prefix rules
 - mixed sorting
 - conditional badges
+- status suffix badges
 - hidden file visibility
 - badge styles
 
@@ -196,15 +228,15 @@ This project uses:
 
 - TypeScript
 - esbuild
-- npm
+- pnpm
 
 Common commands:
 
 ```bash
-npm install
-npm run dev
-npm run build
-npm run lint
+pnpm install
+pnpm dev
+pnpm build
+pnpm lint
 ```
 
 ---
@@ -230,6 +262,7 @@ npm run lint
 - 让前缀显示更清爽
 - 让文件和文件夹按前缀一起排序
 - 为特殊文件或隐藏项显示 Badge
+- 支持把 `_[done]` 这类状态后缀隐藏并显示成 Badge
 
 它 **不会** 修改真实文件名、链接或笔记内容。
 
@@ -325,7 +358,37 @@ npm run lint
 
 在大型 vault 中切换时，可能需要一点时间。
 
-#### 6. Badge 样式
+#### 6. 状态后缀 Badge
+
+可以为文件和文件夹定义状态后缀规则。
+
+例如：
+
+- `Task_[done].md`
+- `Archive_[done].tar.gz`
+- `Project_[done]`
+
+每条规则可以设置：
+
+- 规则名称
+- 作用对象：文件、文件夹或两者
+- 匹配第一个 `.` 之前部分的后缀正则
+- 图标或自定义 SVG
+- 可选文字
+- 可选提示
+- 可选颜色
+- 是否出现在右键菜单
+
+状态后缀 Badge 在前置 Badge 中优先级最高。
+
+如果开启“名称末尾状态 Badge”：
+
+- 状态 Badge 会显示到名称后面
+- 前置位置会重新让给前缀 / 条件 / 隐藏项 / 无前缀 Badge
+
+也可以直接通过文件或文件夹右键菜单设置或清除状态。
+
+#### 7. Badge 样式
 
 可以分别调整 Badge 的外观，例如：
 
@@ -336,7 +399,7 @@ npm run lint
 
 不同类型的 Badge 可以分别设置。
 
-#### 7. 命令面板快捷切换
+#### 8. 命令面板快捷切换
 
 插件提供了命令，方便快速切换：
 
@@ -353,8 +416,8 @@ npm run lint
 cd <你的 Vault>/.obsidian/plugins
 git clone https://github.com/Loong-T/o-decimal.git nerd-is-in-o-decimal
 cd nerd-is-in-o-decimal
-npm install
-npm run build
+pnpm install
+pnpm build
 ```
 
 然后打开 **设置 → 第三方插件**，刷新插件列表并启用 `O Decimal`。
@@ -387,6 +450,7 @@ npm run build
 - 前缀规则
 - 混合排序
 - 条件 Badge
+- 状态后缀 Badge
 - 是否显示隐藏文件
 - Badge 样式
 
@@ -416,7 +480,7 @@ npm run build
 
 - TypeScript
 - esbuild
-- npm
+- pnpm
 
 常用命令：
 

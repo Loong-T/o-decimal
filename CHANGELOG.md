@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.2.0
+
+### Added 新增
+
+- Added status suffix rules for files and folders, including a default `_[done]` rule.
+- Added trailing status badge display mode.
+- Added file and folder context-menu actions for setting or clearing status suffixes.
+- Added dedicated style slots for leading and trailing status badges.
+
+- 新增了文件和文件夹的状态后缀规则，内置默认 `_[done]` 规则。
+- 新增了名称末尾状态 Badge 显示模式。
+- 新增了通过文件和文件夹右键菜单设置或清除状态后缀的能力。
+- 新增了前置状态 Badge 和尾部状态 Badge 的独立样式槽位。
+
+### Changed 变更
+
+- Changed badge priority so status suffix badges are the highest-priority leading badge.
+- When trailing status badge is enabled, the leading badge slot falls back to prefix / conditional / hidden / missing-prefix badges.
+- Simplified status rule editing by deriving write-back suffixes from the regex instead of exposing a separate write-back field.
+- Moved rule delete actions to the rule header beside the drag handle.
+- Updated README and release docs for the new status suffix workflow and `pnpm` commands.
+
+- 调整了 Badge 优先级，状态后缀 Badge 现在是前置 Badge 中最高优先级。
+- 开启尾部状态 Badge 后，前置位置会回退给前缀 / 条件 / 隐藏项 / 无前缀 Badge。
+- 简化了状态规则编辑方式，不再单独暴露写回后缀，而是根据正则自动推导。
+- 将规则删除按钮移动到了规则头部，并放在拖拽把手旁边。
+- 更新了 README 和发布文档，补充状态后缀用法并统一为 `pnpm` 命令。
+
 ## 1.1.0
 
 ### Added 新增
